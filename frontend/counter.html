@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juice Shop - Counter</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body class="dashboard-body">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="ph-fill ph-orange-slice"></i>
+                <h2>FreshJuice</h2>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="admin.html"><i class="ph ph-squares-four"></i> Admin Dashboard</a></li>
+                <li class="active"><a href="counter.html"><i class="ph ph-storefront"></i> Counter</a></li>
+                <li><a href="kitchen.html"><i class="ph ph-cooking-pot"></i> Kitchen</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <p>&copy; 2026 Juice Shop</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <header class="top-header">
+            <div>
+                <h1>Counter</h1>
+                <p class="subtitle">Take customer orders and send to Kitchen.</p>
+            </div>
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="ph ph-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="counter-layout">
+            <!-- Left Side: Menu Grid -->
+            <section class="menu-section">
+                <h2>Menu Items</h2>
+                <div class="menu-grid" id="counter-menu-grid">
+                    <!-- Menu items injected via JS -->
+                </div>
+            </section>
+
+            <!-- Right Side: Current Order / Cart -->
+            <aside class="order-summary-sidebar card">
+                <div class="card-header">
+                    <h2>Current Order</h2>
+                </div>
+                <div class="card-body cart-body">
+                    <div class="form-group table-input">
+                        <label for="table-num">Table Number</label>
+                        <input type="number" id="table-num" min="1" placeholder="e.g. 5" required>
+                    </div>
+
+                    <div class="cart-items" id="cart-items">
+                        <div class="empty-cart-msg">No items selected</div>
+                        <!-- Cart items injected via JS -->
+                    </div>
+
+                    <div class="cart-footer">
+                        <div class="cart-total-row">
+                            <span>Total</span>
+                            <span id="cart-total" class="cart-total-price">₹0</span>
+                        </div>
+                        <button class="btn btn-primary w-100" onclick="submitOrder()">
+                            <i class="ph ph-paper-plane-right"></i> Send to Kitchen
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Success Toast (Hidden by default) -->
+    <div id="toast" class="toast hidden">
+        <i class="ph ph-check-circle"></i>
+        <span>Order sent successfully!</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/script.js"></script>
+</body>
+</html>

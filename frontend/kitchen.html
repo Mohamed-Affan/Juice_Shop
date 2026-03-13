@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juice Shop - Kitchen Display</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body class="dashboard-body">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="ph-fill ph-orange-slice"></i>
+                <h2>FreshJuice</h2>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="admin.html"><i class="ph ph-squares-four"></i> Admin Dashboard</a></li>
+                <li><a href="counter.html"><i class="ph ph-storefront"></i> Counter</a></li>
+                <li class="active"><a href="kitchen.html"><i class="ph ph-cooking-pot"></i> Kitchen</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <p>&copy; 2026 Juice Shop</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <header class="top-header">
+            <div>
+                <h1>Kitchen Display</h1>
+                <p class="subtitle">Live incoming orders to prepare.</p>
+            </div>
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="ph ph-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <section class="kitchen-section">
+            <div class="kitchen-grid" id="kitchen-grid">
+                <!-- Order Tickets injected via JS -->
+            </div>
+            <div id="no-orders-msg" class="empty-cart-msg hidden">
+                <i class="ph ph-check-circle" style="font-size: 3rem; color: var(--secondary); margin-bottom: 1rem; display: block;"></i>
+                All caught up! No active orders right now.
+            </div>
+        </section>
+    </main>
+
+    <!-- Success Toast -->
+    <div id="toast" class="toast hidden">
+        <i class="ph ph-check-circle"></i>
+        <span>Order marked as completed!</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/script.js"></script>
+</body>
+</html>
