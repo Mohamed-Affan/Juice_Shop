@@ -26,7 +26,7 @@ async function doLogout() {
             method: 'POST',
             credentials: 'same-origin'
         });
-    } catch (_) {}
+    } catch (_) { }
     window.location.href = '/login';
 }
 
@@ -92,9 +92,18 @@ function renderMenuTable() {
     }
 
     menuItems.forEach(item => {
+        const imageHtml = item.image_url
+            ? `<img src="${item.image_url}" alt="${item.name}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">`
+            : `<div style="width: 40px; height: 40px; border-radius: 8px; background: var(--gray-200); display: flex; align-items: center; justify-content: center;"><i class="ph ph-image"></i></div>`;
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><strong>${item.name}</strong></td>
+            <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    ${imageHtml}
+                    <strong>${item.name}</strong>
+                </div>
+            </td>
             <td>₹${item.price}</td>
             <td class="actions">
                 <button class="btn-edit" onclick="editMenuItem(${item.id})" title="Edit"><i class="ph ph-pencil-simple"></i></button>
@@ -164,19 +173,51 @@ function openMenuModal(item = null) {
     const idInput = document.getElementById('item-id');
     const nameInput = document.getElementById('item-name');
     const priceInput = document.getElementById('item-price');
+    const imageInput = document.getElementById('item-image');
 
     if (item) {
         title.textContent = 'Edit Menu Item';
         idInput.value = item.id;
         nameInput.value = item.name;
         priceInput.value = item.price;
+        if (imageInput) imageInput.value = '';
     } else {
         title.textContent = 'Add Menu Item';
         form.reset();
         idInput.value = '';
+        if (imageInput) imageInput.value = '';
     }
 
     modal.classList.add('active');
+}
+
+async function changePassword(role) {
+    const inputId = `pass-${role}`;
+    const newPassword = document.getElementById(inputId).value;
+
+    if (!newPassword || newPassword.trim() === '') {
+        alert('Please enter a valid password.');
+        return;
+    }
+
+    try {
+        const res = await fetch(API_BASE + `/api/users/${role}/password`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ new_password: newPassword }),
+            credentials: 'same-origin'
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+            alert(`Success! Password for '${role}' changed to: ${newPassword}`);
+            document.getElementById(inputId).value = '';
+        } else {
+            alert(data.error || 'Failed to update password');
+        }
+    } catch (e) {
+        alert('Network error communicating with server.');
+    }
 }
 
 function closeMenuModal() {
@@ -189,23 +230,30 @@ async function handleMenuSubmit(e) {
 
     const id = document.getElementById('item-id').value;
     const name = document.getElementById('item-name').value;
-    const price = parseInt(document.getElementById('item-price').value);
+    const price = document.getElementById('item-price').value;
+    const imageFile = document.getElementById('item-image').files[0];
+
+    // Use FormData to allow file uploads
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('price', price);
+    if (imageFile) {
+        formData.append('image', imageFile);
+    }
 
     try {
         if (id) {
             // Update existing
             await fetch(API_BASE + `/api/menu/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, price }),
+                body: formData,
                 credentials: 'same-origin'
             });
         } else {
             // Add new
             await fetch(API_BASE + '/api/menu', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, price }),
+                body: formData,
                 credentials: 'same-origin'
             });
         }
@@ -276,12 +324,14 @@ function renderCounterMenu() {
     };
 
     menuItems.forEach(item => {
+        const imageElement = item.image_url
+            ? `<div class="menu-item-icon" style="background: transparent;"><img src="${item.image_url}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"></div>`
+            : `<div class="menu-item-icon"><i class="ph-fill ${getIcon(item.name)}"></i></div>`;
+
         const card = document.createElement('div');
         card.className = 'menu-item-card';
         card.innerHTML = `
-            <div class="menu-item-icon">
-                <i class="ph-fill ${getIcon(item.name)}"></i>
-            </div>
+            ${imageElement}
             <div class="menu-item-name">${item.name}</div>
             <div class="menu-item-price">₹${item.price}</div>
             <button class="btn btn-secondary w-100" onclick="addToCart(${item.id})">
@@ -300,7 +350,7 @@ function addToCart(itemId) {
     if (existing) {
         existing.quantity += 1;
     } else {
-        cart.push({ item: {...item}, quantity: 1 });
+        cart.push({ item: { ...item }, quantity: 1 });
     }
 
     updateCartUI();
@@ -433,9 +483,10 @@ async function loadKitchenOrders(isInitialLoad = false) {
         // Fetch pending & preparing orders
         const res = await fetch(API_BASE + '/api/orders', { credentials: 'same-origin' });
         const allOrders = await res.json();
+
         // Only show pending and preparing
         kitchenOrders = allOrders.filter(o => o.status === 'pending' || o.status === 'preparing');
-        
+
         // Check for new orders
         let hasNewOrders = false;
         if (!isInitialLoad) {
@@ -458,6 +509,22 @@ async function loadKitchenOrders(isInitialLoad = false) {
                 alertSound.play().catch(e => console.log('Audio play failed (maybe no interaction yet):', e));
             }
         }
+
+
+
+        const now = new Date();
+        // Only show pending and preparing, and precalculate elapsed time for sorting
+        kitchenOrders = allOrders
+            .filter(o => o.status === 'pending' || o.status === 'preparing')
+            .map(o => {
+                const orderTime = new Date(o.order_time);
+                o.diffSeconds = Math.max(0, Math.floor((now - orderTime) / 1000));
+                return o;
+            });
+
+        // Sort by longest wait time first (descending diffSeconds)
+        kitchenOrders.sort((a, b) => b.diffSeconds - a.diffSeconds);
+
 
         renderKitchenGrid();
     } catch (e) {
@@ -483,13 +550,13 @@ function renderKitchenGrid() {
 
     kitchenOrders.forEach(order => {
         const ticket = document.createElement('div');
-        
+
         let highlightClass = '';
         if (newlyArrivedOrderIds.has(order.id)) {
             highlightClass = 'new-order-highlight';
             newlyArrivedOrderIds.delete(order.id); // Remove after highlighting once
         }
-        
+
         ticket.className = `order-ticket ${order.status} ${highlightClass}`;
         ticket.id = `ticket-${order.id}`;
 
@@ -548,12 +615,13 @@ function updateKitchenTimers() {
             textSpan.textContent = `${mins}:${secs}`;
         }
 
+
         // Color coding logic based on elapsed time
         const ticketEl = document.getElementById(`ticket-${order.id}`);
         if (ticketEl) {
             // Remove previous timer classes
             ticketEl.classList.remove('timer-green', 'timer-yellow', 'timer-red');
-            
+
             const diffMinutes = diffSeconds / 60;
             if (diffMinutes >= 15) {
                 ticketEl.classList.add('timer-red');
