@@ -1,55 +1,91 @@
 /**
  * script.js
- * Contains frontend logic, using mock data for now since APIs are not ready.
+ * Frontend logic for Juice Shop – wired to real backend APIs.
  */
 
-// --- Global Mock Data ---
-let menuItems = [
-    { id: 1, name: 'Mango Juice', price: 100 },
-    { id: 2, name: 'Orange Juice', price: 80 },
-    { id: 3, name: 'Apple Juice', price: 90 }
-];
+const API_BASE = '';  // Same origin when served by Flask
 
-let orders = [
-    { id: 'ORD001', table: 5, status: 'completed', total: 280 },
-    { id: 'ORD002', table: 2, status: 'preparing', total: 180 },
-    { id: 'ORD003', table: 4, status: 'pending', total: 90 }
-];
+// ── Auth Guard ───────────────────────────────────────────────────────────────
+async function checkAuth() {
+    try {
+        const res = await fetch(API_BASE + '/api/auth/check', { credentials: 'same-origin' });
+        if (!res.ok) {
+            window.location.href = '/login';
+            return null;
+        }
+        return await res.json();
+    } catch (e) {
+        window.location.href = '/login';
+        return null;
+    }
+}
+
+async function doLogout() {
+    try {
+        await fetch(API_BASE + '/api/logout', {
+            method: 'POST',
+            credentials: 'same-origin'
+        });
+    } catch (_) {}
+    window.location.href = '/login';
+}
 
 
-// --- Initialization ---
-document.addEventListener('DOMContentLoaded', () => {
-    // Determine which page we are on based on URL or elements present
+// ── Initialization ───────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+    const authData = await checkAuth();
+    if (!authData) return; // redirected
+
+    // Set username in avatar tooltip if exists
+    const avatarEl = document.querySelector('.user-profile .avatar');
+    if (avatarEl) {
+        avatarEl.title = `${authData.username} (${authData.role})`;
+    }
+
+    // Init based on current page
     if (document.getElementById('menu-table-body')) {
         initAdminDashboard();
     }
-    
     if (document.getElementById('counter-menu-grid')) {
         initCounter();
     }
-    
     if (document.getElementById('kitchen-grid')) {
         initKitchen();
     }
 });
 
-// --- Admin Dashboard Logic ---
 
-function initAdminDashboard() {
-    renderMenuTable();
-    renderRecentOrders();
-    updateStatsGrid();
+// ══════════════════════════════════════════════════════════════════════════════
+//  ADMIN DASHBOARD
+// ══════════════════════════════════════════════════════════════════════════════
+
+let menuItems = [];
+
+async function initAdminDashboard() {
+    await loadMenuItems();
+    await loadRecentOrders();
+    await loadTodayStats();
 }
 
-/**
- * Renders the menu table dynamically
- */
+/** Fetch menu items from API */
+async function loadMenuItems() {
+    try {
+        const res = await fetch(API_BASE + '/api/menu', { credentials: 'same-origin' });
+        menuItems = await res.json();
+        renderMenuTable();
+    } catch (e) {
+        console.error('Failed to load menu:', e);
+        menuItems = [];
+        renderMenuTable();
+    }
+}
+
 function renderMenuTable() {
     const tbody = document.getElementById('menu-table-body');
     if (!tbody) return;
-    
+
     tbody.innerHTML = '';
-    
+
     if (menuItems.length === 0) {
         tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: var(--gray-500);">No menu items found.</td></tr>`;
         return;
@@ -69,56 +105,57 @@ function renderMenuTable() {
     });
 }
 
-/**
- * Renders the recent orders summary on admin page
- */
-function renderRecentOrders() {
+/** Fetch recent orders from API */
+async function loadRecentOrders() {
     const tbody = document.getElementById('recent-orders-body');
     if (!tbody) return;
-    
-    tbody.innerHTML = '';
-    
-    const recent = orders.slice(0, 5); // Just show top 5 for summary
-    
-    if (recent.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--gray-500);">No orders today.</td></tr>`;
-        return;
-    }
 
-    recent.forEach(order => {
-        const statusClass = order.status.toLowerCase();
-        // Capitalize first letter of status
-        const statusText = order.status.charAt(0).toUpperCase() + order.status.slice(1);
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${order.id}</td>
-            <td>Table ${order.table}</td>
-            <td><span class="status ${statusClass}">${statusText}</span></td>
-            <td><strong>₹${order.total}</strong></td>
-        `;
-        tbody.appendChild(tr);
-    });
+    try {
+        const res = await fetch(API_BASE + '/api/orders', { credentials: 'same-origin' });
+        const orders = await res.json();
+        tbody.innerHTML = '';
+
+        if (orders.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--gray-500);">No orders today.</td></tr>`;
+            return;
+        }
+
+        orders.slice(0, 10).forEach(order => {
+            const statusClass = order.status.toLowerCase();
+            const statusText = order.status.charAt(0).toUpperCase() + order.status.slice(1);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>#${order.id}</td>
+                <td>Table ${order.table_number}</td>
+                <td><span class="status ${statusClass}">${statusText}</span></td>
+                <td><strong>₹${order.total_amount}</strong></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--gray-500);">Could not load orders.</td></tr>`;
+    }
 }
 
-/**
- * Updates the totals cards
- */
-function updateStatsGrid() {
+/** Fetch today's earnings & order count from API */
+async function loadTodayStats() {
     const totalEarningsEl = document.getElementById('total-earnings');
     const totalOrdersEl = document.getElementById('total-orders');
-    
-    if (totalEarningsEl && totalOrdersEl) {
-        // Calculate earnings (only completed orders in a real system, but let's just sum all for demo or only completed)
-        const completedOnly = orders.filter(o => o.status === 'completed');
-        const earnings = completedOnly.reduce((sum, order) => sum + order.total, 0);
-        
-        totalEarningsEl.textContent = `₹${earnings}`;
-        totalOrdersEl.textContent = orders.length.toString();
+    if (!totalEarningsEl || !totalOrdersEl) return;
+
+    try {
+        const res = await fetch(API_BASE + '/api/reports/today', { credentials: 'same-origin' });
+        const data = await res.json();
+        totalEarningsEl.textContent = `₹${data.total_revenue}`;
+        totalOrdersEl.textContent = data.total_orders.toString();
+    } catch (e) {
+        totalEarningsEl.textContent = '₹0';
+        totalOrdersEl.textContent = '0';
     }
 }
 
-// --- Menu Modal Logic ---
+
+// ── Menu Modal Logic (Admin) ─────────────────────────────────────────────────
 
 function openMenuModal(item = null) {
     const modal = document.getElementById('menu-modal');
@@ -147,27 +184,36 @@ function closeMenuModal() {
     modal.classList.remove('active');
 }
 
-function handleMenuSubmit(e) {
+async function handleMenuSubmit(e) {
     e.preventDefault();
-    
+
     const id = document.getElementById('item-id').value;
     const name = document.getElementById('item-name').value;
     const price = parseInt(document.getElementById('item-price').value);
 
-    if (id) {
-        // Edit existing
-        const index = menuItems.findIndex(i => i.id == id);
-        if (index !== -1) {
-            menuItems[index] = { id: parseInt(id), name, price };
+    try {
+        if (id) {
+            // Update existing
+            await fetch(API_BASE + `/api/menu/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, price }),
+                credentials: 'same-origin'
+            });
+        } else {
+            // Add new
+            await fetch(API_BASE + '/api/menu', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, price }),
+                credentials: 'same-origin'
+            });
         }
-    } else {
-        // Add new
-        const newId = menuItems.length > 0 ? Math.max(...menuItems.map(i => i.id)) + 1 : 1;
-        menuItems.push({ id: newId, name, price });
+        closeMenuModal();
+        await loadMenuItems();
+    } catch (e) {
+        alert('Failed to save menu item.');
     }
-
-    closeMenuModal();
-    renderMenuTable();
 }
 
 function editMenuItem(id) {
@@ -177,37 +223,56 @@ function editMenuItem(id) {
     }
 }
 
-function deleteMenuItem(id) {
+async function deleteMenuItem(id) {
     if (confirm('Are you sure you want to delete this item?')) {
-        menuItems = menuItems.filter(i => i.id != id);
-        renderMenuTable();
+        try {
+            await fetch(API_BASE + `/api/menu/${id}`, {
+                method: 'DELETE',
+                credentials: 'same-origin'
+            });
+            await loadMenuItems();
+        } catch (e) {
+            alert('Failed to delete menu item.');
+        }
     }
 }
 
-// --- Counter Logic ---
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  COUNTER
+// ══════════════════════════════════════════════════════════════════════════════
 
 let cart = []; // Array of { item: Object, quantity: Number }
 
-function initCounter() {
-    renderCounterMenu();
+async function initCounter() {
+    await loadCounterMenu();
     updateCartUI();
 }
 
-/**
- * Render the menu grid on the Counter page
- */
+async function loadCounterMenu() {
+    try {
+        const res = await fetch(API_BASE + '/api/menu', { credentials: 'same-origin' });
+        menuItems = await res.json();
+        renderCounterMenu();
+    } catch (e) {
+        console.error('Failed to load menu for counter:', e);
+    }
+}
+
 function renderCounterMenu() {
     const grid = document.getElementById('counter-menu-grid');
     if (!grid) return;
-    
+
     grid.innerHTML = '';
-    
-    // Choose an icon based on name (mocking different icons for juices)
+
     const getIcon = (name) => {
         name = name.toLowerCase();
         if (name.includes('orange')) return 'ph-orange-slice';
         if (name.includes('apple')) return 'ph-apple-logo';
-        return 'ph-brandy'; // default glass
+        if (name.includes('mango')) return 'ph-drop';
+        if (name.includes('lime')) return 'ph-leaf';
+        if (name.includes('watermelon')) return 'ph-thermometer-cold';
+        return 'ph-brandy';
     };
 
     menuItems.forEach(item => {
@@ -237,7 +302,7 @@ function addToCart(itemId) {
     } else {
         cart.push({ item: {...item}, quantity: 1 });
     }
-    
+
     updateCartUI();
 }
 
@@ -246,7 +311,7 @@ function updateCartQuantity(itemId, delta) {
     if (index !== -1) {
         cart[index].quantity += delta;
         if (cart[index].quantity <= 0) {
-            cart.splice(index, 1); // remove item
+            cart.splice(index, 1);
         }
     }
     updateCartUI();
@@ -294,7 +359,7 @@ function updateCartUI() {
     totalEl.textContent = `₹${total}`;
 }
 
-function submitOrder() {
+async function submitOrder() {
     const tableInput = document.getElementById('table-num');
     const tableNum = tableInput.value;
 
@@ -308,56 +373,70 @@ function submitOrder() {
         return;
     }
 
-    // In a real app, this would send an API request (POST /api/orders)
-    // For now, we simulate success and show toast
-    
-    const toast = document.getElementById('toast');
-    if (toast) {
-        toast.classList.remove('hidden');
-        setTimeout(() => {
-            toast.classList.add('hidden');
-        }, 3000);
-    }
+    const payload = {
+        table_number: parseInt(tableNum),
+        items: cart.map(c => ({ menu_id: c.item.id, quantity: c.quantity }))
+    };
 
-    // Reset Counter UI
-    cart = [];
-    tableInput.value = '';
-    updateCartUI();
+    try {
+        const res = await fetch(API_BASE + '/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            credentials: 'same-origin'
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            // Show success toast
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.classList.remove('hidden');
+                setTimeout(() => toast.classList.add('hidden'), 3000);
+            }
+            // Reset
+            cart = [];
+            tableInput.value = '';
+            updateCartUI();
+        } else {
+            alert(data.error || 'Failed to place order.');
+        }
+    } catch (e) {
+        alert('Network error. Is the server running?');
+    }
 }
 
-// --- Kitchen Logic ---
 
-// Mocking some incoming detailed orders for Kitchen
-let kitchenOrders = [
-    {
-        id: 'ORD004',
-        table: 3,
-        status: 'preparing',
-        placedAt: new Date(Date.now() - 300000), // 5 mins ago
-        items: [
-            { name: 'Mango Juice', quantity: 2 },
-            { name: 'Apple Juice', quantity: 1 }
-        ]
-    },
-    {
-        id: 'ORD005',
-        table: 7,
-        status: 'pending',
-        placedAt: new Date(Date.now() - 60000), // 1 min ago
-        items: [
-            { name: 'Orange Juice', quantity: 3 }
-        ]
-    }
-];
+// ══════════════════════════════════════════════════════════════════════════════
+//  KITCHEN
+// ══════════════════════════════════════════════════════════════════════════════
 
+let kitchenOrders = [];
 let kitchenTimerInterval = null;
 
-function initKitchen() {
-    renderKitchenGrid();
-    
-    // Start interval to update timers every second
+async function initKitchen() {
+    await loadKitchenOrders();
+
+    // Refresh orders every 5 seconds
+    setInterval(loadKitchenOrders, 5000);
+
+    // Update timers every second
     if (kitchenTimerInterval) clearInterval(kitchenTimerInterval);
     kitchenTimerInterval = setInterval(updateKitchenTimers, 1000);
+}
+
+async function loadKitchenOrders() {
+    try {
+        // Fetch pending & preparing orders
+        const res = await fetch(API_BASE + '/api/orders', { credentials: 'same-origin' });
+        const allOrders = await res.json();
+        // Only show pending and preparing
+        kitchenOrders = allOrders.filter(o => o.status === 'pending' || o.status === 'preparing');
+        renderKitchenGrid();
+    } catch (e) {
+        console.error('Failed to load kitchen orders:', e);
+    }
 }
 
 function renderKitchenGrid() {
@@ -366,11 +445,8 @@ function renderKitchenGrid() {
     if (!grid) return;
 
     grid.innerHTML = '';
-    
-    // Filter out completed ones, only show pending/preparing
-    const activeOrders = kitchenOrders.filter(o => o.status !== 'completed');
 
-    if (activeOrders.length === 0) {
+    if (kitchenOrders.length === 0) {
         grid.classList.add('hidden');
         if (noOrdersMsg) noOrdersMsg.classList.remove('hidden');
         return;
@@ -379,24 +455,29 @@ function renderKitchenGrid() {
         if (noOrdersMsg) noOrdersMsg.classList.add('hidden');
     }
 
-    activeOrders.forEach(order => {
+    kitchenOrders.forEach(order => {
         const ticket = document.createElement('div');
         ticket.className = `order-ticket ${order.status}`;
-        
-        // Items HTML
+
+        // Parse items from items_summary string (e.g. "Mango Shake x2, Fresh Lime x1")
         let itemsHtml = '';
-        order.items.forEach(item => {
-            itemsHtml += `
-                <div class="ticket-item">
-                    <span class="ticket-item-qty">${item.quantity}</span>
-                    <span class="ticket-item-name">${item.name}</span>
-                </div>
-            `;
-        });
+        if (order.items_summary) {
+            order.items_summary.split(', ').forEach(itemStr => {
+                const parts = itemStr.split(' x');
+                const name = parts.slice(0, -1).join(' x');
+                const qty = parts[parts.length - 1];
+                itemsHtml += `
+                    <div class="ticket-item">
+                        <span class="ticket-item-qty">${qty}</span>
+                        <span class="ticket-item-name">${name}</span>
+                    </div>
+                `;
+            });
+        }
 
         ticket.innerHTML = `
             <div class="order-ticket-header">
-                <div class="ticket-table-no">Table ${order.table}</div>
+                <div class="ticket-table-no">Table ${order.table_number}</div>
                 <div class="ticket-timer" id="timer-${order.id}">
                     <i class="ph ph-clock"></i>
                     <span class="timer-text">00:00</span>
@@ -405,34 +486,34 @@ function renderKitchenGrid() {
             <div class="ticket-items-list">
                 ${itemsHtml}
             </div>
-            <button class="btn btn-primary w-100" onclick="completeOrder('${order.id}')">
+            <button class="btn btn-primary w-100" onclick="completeOrder(${order.id})">
                 <i class="ph ph-check-circle"></i> Mark Completed
             </button>
         `;
         grid.appendChild(ticket);
     });
 
-    updateKitchenTimers(); // immediately calculate times
+    updateKitchenTimers();
 }
 
 function updateKitchenTimers() {
-    const activeOrders = kitchenOrders.filter(o => o.status !== 'completed');
     const now = new Date();
 
-    activeOrders.forEach(order => {
+    kitchenOrders.forEach(order => {
         const timerEl = document.getElementById(`timer-${order.id}`);
         if (!timerEl) return;
 
-        const diffSeconds = Math.floor((now - order.placedAt) / 1000);
+        // Parse order_time from DB
+        const orderTime = new Date(order.order_time);
+        const diffSeconds = Math.max(0, Math.floor((now - orderTime) / 1000));
         const mins = Math.floor(diffSeconds / 60).toString().padStart(2, '0');
         const secs = (diffSeconds % 60).toString().padStart(2, '0');
-        
+
         const textSpan = timerEl.querySelector('.timer-text');
         if (textSpan) {
             textSpan.textContent = `${mins}:${secs}`;
         }
 
-        // Highlight if order is older than 10 mins (600s)
         if (diffSeconds > 600) {
             timerEl.classList.add('urgent');
         } else {
@@ -441,21 +522,25 @@ function updateKitchenTimers() {
     });
 }
 
-function completeOrder(orderId) {
-    const orderIndex = kitchenOrders.findIndex(o => o.id === orderId);
-    if (orderIndex !== -1) {
-        kitchenOrders[orderIndex].status = 'completed';
-        
-        // Show success toast
-        const toast = document.getElementById('toast');
-        if (toast) {
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
+async function completeOrder(orderId) {
+    try {
+        const res = await fetch(API_BASE + `/api/orders/${orderId}/complete`, {
+            method: 'PUT',
+            credentials: 'same-origin'
+        });
+
+        if (res.ok) {
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.classList.remove('hidden');
+                setTimeout(() => toast.classList.add('hidden'), 3000);
+            }
+            await loadKitchenOrders();
+        } else {
+            const data = await res.json();
+            alert(data.error || 'Failed to complete order.');
         }
-        
-        // Re-render
-        renderKitchenGrid();
+    } catch (e) {
+        alert('Network error.');
     }
 }

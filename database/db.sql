@@ -26,6 +26,14 @@ CREATE TABLE IF NOT EXISTS order_items (
     FOREIGN KEY (menu_id) REFERENCES menu(id)
 );
 
+-- Users table for authentication
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('admin', 'counter', 'kitchen'))
+);
+
 -- Seed default menu items (matching frontend)
 INSERT OR IGNORE INTO menu (id, name, price, category) VALUES
     (1, 'Watermelon', 60, 'Fresh Juices'),
@@ -34,3 +42,6 @@ INSERT OR IGNORE INTO menu (id, name, price, category) VALUES
     (4, 'Orange Juice', 70, 'Fresh Juices'),
     (5, 'Apple Juice', 90, 'Fresh Juices'),
     (6, 'Mixed Fruit', 85, 'Smoothies');
+
+-- Seed default users (passwords will be hashed at runtime by init_db)
+-- admin/admin123, counter/counter123, kitchen/kitchen123

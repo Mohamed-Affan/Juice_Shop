@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juice Shop - Login</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        *, *::before, *::after {
+            margin: 0; padding: 0; box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #f97316;
+            --primary-hover: #ea580c;
+            --secondary: #10b981;
+            --dark: #1e293b;
+            --gray-100: #f8fafc;
+            --gray-200: #e2e8f0;
+            --gray-500: #64748b;
+            --gray-800: #1e293b;
+            --white: #ffffff;
+            --danger: #ef4444;
+            --radius-md: 0.5rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 30%, #ecfdf5 70%, #f0fdf4 100%);
+            background-attachment: fixed;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated background shapes */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            z-index: 0;
+            opacity: 0.15;
+            animation: float 8s ease-in-out infinite;
+        }
+        body::before {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, #f97316, transparent 70%);
+            top: -100px; right: -100px;
+            animation-delay: -2s;
+        }
+        body::after {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, #10b981, transparent 70%);
+            bottom: -150px; left: -150px;
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-30px) scale(1.05); }
+        }
+
+        .login-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 440px;
+            padding: 1.5rem;
+        }
+
+        /* Logo area */
+        .brand-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            border-radius: 50%;
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 8px 30px rgba(249, 115, 22, 0.35);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 8px 30px rgba(249, 115, 22, 0.35); }
+            50% { box-shadow: 0 8px 40px rgba(249, 115, 22, 0.55); }
+        }
+
+        .brand-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+            letter-spacing: -0.02em;
+        }
+        .brand-header p {
+            color: var(--gray-500);
+            font-size: 1rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Card */
+        .login-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Role tab selector */
+        .role-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--gray-100);
+            border-radius: var(--radius-lg);
+            padding: 0.375rem;
+            margin-bottom: 2rem;
+        }
+
+        .role-tab {
+            flex: 1;
+            padding: 0.75rem 0.5rem;
+            border-radius: var(--radius-md);
+            border: none;
+            background: transparent;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--gray-500);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .role-tab:hover {
+            color: var(--dark);
+            background: rgba(255,255,255,0.5);
+        }
+
+        .role-tab.active {
+            background: var(--white);
+            color: var(--primary);
+            font-weight: 600;
+            box-shadow: var(--shadow-md);
+        }
+
+        .role-tab i { font-size: 1.1rem; }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--gray-800);
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        .input-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-500);
+            font-size: 1.15rem;
+            transition: color 0.3s;
+        }
+        .input-wrapper input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 2.75rem;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+        .input-wrapper input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+        }
+        .input-wrapper input:focus + i,
+        .input-wrapper input:focus ~ i {
+            color: var(--primary);
+        }
+
+        /* Error message */
+        .error-msg {
+            background: #fef2f2;
+            color: var(--danger);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            animation: shake 0.4s ease;
+        }
+        .error-msg.visible {
+            display: flex;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        /* Login button */
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);
+            margin-top: 0.5rem;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5);
+        }
+        .login-btn:active {
+            transform: translateY(0);
+        }
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-btn .spinner {
+            display: none;
+            animation: spin 0.8s linear infinite;
+        }
+        .login-btn.loading .spinner { display: inline-block; }
+        .login-btn.loading .btn-text { display: none; }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Hint */
+        .login-hint {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.825rem;
+            color: var(--gray-500);
+            line-height: 1.6;
+        }
+        .login-hint strong {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-card { padding: 2rem 1.5rem; }
+            .brand-header h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="brand-header">
+            <div class="brand-icon">
+                <i class="ph-fill ph-orange-slice"></i>
+            </div>
+            <h1>FreshJuice</h1>
+            <p>Sign in to continue</p>
+        </div>
+
+        <div class="login-card">
+            <!-- Role Tabs -->
+            <div class="role-tabs" id="role-tabs">
+                <button class="role-tab active" data-role="admin" onclick="selectRole('admin')">
+                    <i class="ph ph-shield-check"></i> Admin
+                </button>
+                <button class="role-tab" data-role="counter" onclick="selectRole('counter')">
+                    <i class="ph ph-storefront"></i> Counter
+                </button>
+                <button class="role-tab" data-role="kitchen" onclick="selectRole('kitchen')">
+                    <i class="ph ph-cooking-pot"></i> Kitchen
+                </button>
+            </div>
+
+            <!-- Error -->
+            <div class="error-msg" id="error-msg">
+                <i class="ph ph-warning-circle"></i>
+                <span id="error-text">Invalid credentials</span>
+            </div>
+
+            <!-- Form -->
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="username" placeholder="Enter username" required autocomplete="username">
+                        <i class="ph ph-user"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" placeholder="Enter password" required autocomplete="current-password">
+                        <i class="ph ph-lock"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn" id="login-btn">
+                    <i class="ph ph-spinner spinner"></i>
+                    <span class="btn-text"><i class="ph ph-sign-in"></i> Sign In</span>
+                </button>
+            </form>
+
+            <div class="login-hint">
+                Default credentials:<br>
+                <strong>admin</strong>/admin123 &nbsp;·&nbsp;
+                <strong>counter</strong>/counter123 &nbsp;·&nbsp;
+                <strong>kitchen</strong>/kitchen123
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedRole = 'admin';
+
+        // Pre-fill username/password based on role
+        const defaults = {
+            admin:   { user: 'admin',   pass: 'admin123' },
+            counter: { user: 'counter', pass: 'counter123' },
+            kitchen: { user: 'kitchen', pass: 'kitchen123' },
+        };
+
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.role === role);
+            });
+            // Auto-fill for convenience
+            document.getElementById('username').value = defaults[role].user;
+            document.getElementById('password').value = defaults[role].pass;
+            hideError();
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('error-msg');
+            document.getElementById('error-text').textContent = msg;
+            el.classList.add('visible');
+        }
+        function hideError() {
+            document.getElementById('error-msg').classList.remove('visible');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            hideError();
+
+            const btn = document.getElementById('login-btn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
+                    credentials: 'same-origin'
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    // Redirect based on role
+                    const routes = {
+                        admin: '/admin.html',
+                        counter: '/counter.html',
+                        kitchen: '/kitchen.html'
+                    };
+                    window.location.href = routes[data.role] || '/';
+                } else {
+                    showError(data.error || 'Login failed');
+                }
+            } catch (err) {
+                showError('Network error. Is the server running?');
+            }
+
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
+
+        // If already logged in, redirect
+        (async () => {
+            try {
+                const res = await fetch('/api/auth/check', { credentials: 'same-origin' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.authenticated) {
+                        const routes = { admin: '/admin.html', counter: '/counter.html', kitchen: '/kitchen.html' };
+                        window.location.href = routes[data.role] || '/';
+                    }
+                }
+            } catch (_) {}
+        })();
+
+        // Auto-fill admin by default
+        selectRole('admin');
+    </script>
+</body>
+</html>
