@@ -7,11 +7,61 @@ from flask_cors import CORS
 from datetime import datetime, date
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from marshmallow import Schema, fields, validate, ValidationError
+
+load_dotenv()
 
 # ── App Setup ──────────────────────────────────────────────────────────────────
 app = Flask(__name__)
-app.secret_key = 'juice-shop-secret-key-2026'
+app.secret_key = os.environ.get('SECRET_KEY', 'fallback-key-do-not-use-in-prod')
 CORS(app, supports_credentials=True)
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify(error="Rate limit exceeded", description=str(e.description)), 429
+
+# ── Validation Schemas ──────────────────────────────────────────────────────
+class LoginSchema(Schema):
+    class Meta:
+        unknown = 'RAISE'
+    username = fields.String(required=True, validate=validate.Length(min=1, max=50))
+    password = fields.String(required=True, validate=validate.Length(min=1, max=100))
+
+class ChangePasswordSchema(Schema):
+    class Meta:
+        unknown = 'RAISE'
+    new_password = fields.String(required=True, validate=validate.Length(min=6, max=100))
+
+class MenuItemSchema(Schema):
+    class Meta:
+        unknown = 'RAISE'
+    name = fields.String(required=True, validate=validate.Length(min=1, max=100))
+    price = fields.Float(required=True, validate=validate.Range(min=0))
+    category = fields.String(load_default='Fresh Juices', validate=validate.Length(max=50))
+
+class OrderItemSchema(Schema):
+    class Meta:
+        unknown = 'RAISE'
+    menu_id = fields.Integer(required=True, validate=validate.Range(min=1))
+    quantity = fields.Integer(load_default=1, validate=validate.Range(min=1, max=100))
+
+class OrderSchema(Schema):
+    class Meta:
+        unknown = 'RAISE'
+    table_number = fields.Integer(required=True, validate=validate.Range(min=1, max=100))
+    items = fields.List(fields.Nested(OrderItemSchema), required=True, validate=validate.Length(min=1))
+    payment_method = fields.String(load_default='cash', validate=validate.OneOf(["cash", "upi"]))
+    order_type = fields.String(load_default='dine-in', validate=validate.OneOf(["dine-in", "takeout"]))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, '..', 'database', 'juice_shop.db')
@@ -86,11 +136,13 @@ def admin_required(f):
 
 # ── Auth API ───────────────────────────────────────────────────────────────────
 @app.route('/api/login', methods=['POST'])
+@limiter.limit("5 per minute")
 def login():
     """Authenticate user. Body: {username, password}"""
-    data = request.get_json()
-    if not data or not data.get('username') or not data.get('password'):
-        return jsonify({'error': 'Username and password are required'}), 400
+    try:
+        data = LoginSchema().load(request.get_json() or {})
+    except ValidationError as err:
+        return jsonify({'error': 'Invalid input', 'messages': err.messages}), 400
 
     conn = get_db()
     user = conn.execute(
@@ -133,13 +185,15 @@ def logout():
 
 @app.route('/api/users/<role>/password', methods=['PUT'])
 @admin_required
+@limiter.limit("5 per minute")
 def change_password(role):
     """Change the password for a specific user role."""
-    data = request.get_json()
-    new_password = data.get('new_password')
+    try:
+        data = ChangePasswordSchema().load(request.get_json() or {})
+    except ValidationError as err:
+        return jsonify({'error': 'Invalid input', 'messages': err.messages}), 400
     
-    if not new_password:
-        return jsonify({'error': 'New password is required'}), 400
+    new_password = data['new_password']
         
     conn = get_db()
     
@@ -224,17 +278,17 @@ def get_menu():
 @admin_required
 def add_menu_item():
     """Add a new menu item. Body can be JSON or multipart/form-data for image upload."""
+    is_form = bool(request.files or request.form)
+    raw_data = request.form.to_dict() if is_form else (request.get_json() or {})
+    
+    try:
+        data = MenuItemSchema().load(raw_data)
+    except ValidationError as err:
+        return jsonify({'error': 'Invalid input', 'messages': err.messages}), 400
+        
     conn = get_db()
     
-    # Handle multipart/form-data
-    if request.files or request.form:
-        name = request.form.get('name')
-        price = request.form.get('price')
-        category = request.form.get('category', 'Fresh Juices')
-        
-        if not name or price is None:
-            return jsonify({'error': 'name and price are required'}), 400
-            
+    if is_form:
         image_url = None
         if 'image' in request.files:
             file = request.files['image']
@@ -247,17 +301,12 @@ def add_menu_item():
                 
         cur = conn.execute(
             'INSERT INTO menu (name, price, category, image_url) VALUES (?, ?, ?, ?)',
-            (name, float(price), category, image_url)
+            (data['name'], data['price'], data['category'], image_url)
         )
-    # Handle JSON
     else:
-        data = request.get_json()
-        if not data or not data.get('name') or data.get('price') is None:
-            return jsonify({'error': 'name and price are required'}), 400
-
         cur = conn.execute(
             'INSERT INTO menu (name, price, category) VALUES (?, ?, ?)',
-            (data['name'], float(data['price']), data.get('category', 'Fresh Juices'))
+            (data['name'], data['price'], data['category'])
         )
         
     conn.commit()
@@ -276,12 +325,22 @@ def update_menu_item(item_id):
         conn.close()
         return jsonify({'error': 'Item not found'}), 404
 
-    # Handle multipart/form-data
-    if request.files or request.form:
-        name = request.form.get('name', item['name'])
-        price = request.form.get('price', item['price'])
-        category = request.form.get('category', item['category'])
-        
+    is_form = bool(request.files or request.form)
+    raw_data = request.form.to_dict() if is_form else (request.get_json() or {})
+    
+    merged_data = {
+        'name': raw_data.get('name', item['name']),
+        'price': raw_data.get('price', item['price']),
+        'category': raw_data.get('category', item['category'])
+    }
+    
+    try:
+        data = MenuItemSchema().load(merged_data)
+    except ValidationError as err:
+        conn.close()
+        return jsonify({'error': 'Invalid input', 'messages': err.messages}), 400
+
+    if is_form:
         image_url = item['image_url']
         if 'image' in request.files:
             file = request.files['image']
@@ -294,19 +353,12 @@ def update_menu_item(item_id):
                 
         conn.execute(
             'UPDATE menu SET name = ?, price = ?, category = ?, image_url = ? WHERE id = ?',
-            (name, float(price), category, image_url, item_id)
+            (data['name'], data['price'], data['category'], image_url, item_id)
         )
-    # Handle JSON
     else:
-        data = request.get_json()
         conn.execute(
             'UPDATE menu SET name = ?, price = ?, category = ? WHERE id = ?',
-            (
-                data.get('name', item['name']),
-                float(data.get('price', item['price'])),
-                data.get('category', item['category']),
-                item_id
-            )
+            (data['name'], data['price'], data['category'], item_id)
         )
         
     conn.commit()
@@ -341,9 +393,10 @@ def create_order():
         order_type?: "dine-in" | "takeout"
     }
     """
-    data = request.get_json()
-    if not data or not data.get('items'):
-        return jsonify({'error': 'items are required'}), 400
+    try:
+        data = OrderSchema().load(request.get_json() or {})
+    except ValidationError as err:
+        return jsonify({'error': 'Invalid input', 'messages': err.messages}), 400
 
     conn = get_db()
 
