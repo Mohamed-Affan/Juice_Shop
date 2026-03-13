@@ -1,10 +1,12 @@
 import os
 import sqlite3
+import uuid
 from functools import wraps
 from flask import Flask, request, jsonify, send_from_directory, session, redirect
 from flask_cors import CORS
 from datetime import datetime, date
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 # ── App Setup ──────────────────────────────────────────────────────────────────
 app = Flask(__name__)
@@ -15,6 +17,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, '..', 'database', 'juice_shop.db')
 SCHEMA_PATH = os.path.join(BASE_DIR, '..', 'database', 'db.sql')
 FRONTEND_DIR = os.path.join(BASE_DIR, '..', 'frontend')
+UPLOAD_FOLDER = os.path.join(FRONTEND_DIR, 'uploads')
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 # ── Database Helpers ───────────────────────────────────────────────────────────
@@ -126,10 +131,51 @@ def logout():
     return jsonify({'message': 'Logged out successfully'})
 
 
+@app.route('/api/users/<role>/password', methods=['PUT'])
+@admin_required
+def change_password(role):
+    """Change the password for a specific user role."""
+    data = request.get_json()
+    new_password = data.get('new_password')
+    
+    if not new_password:
+        return jsonify({'error': 'New password is required'}), 400
+        
+    conn = get_db()
+    
+    # Check if role exists
+    user = conn.execute('SELECT * FROM users WHERE role = ?', (role,)).fetchone()
+    if not user:
+        conn.close()
+        return jsonify({'error': 'Role not found'}), 404
+        
+    hashed_password = generate_password_hash(new_password)
+    
+    conn.execute(
+        'UPDATE users SET password_hash = ? WHERE role = ?',
+        (hashed_password, role)
+    )
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'message': f'Password updated successfully for {role}'})
+
+
 # ── Serve Frontend ─────────────────────────────────────────────────────────────
 @app.route('/')
 def serve_index():
-    return send_from_directory(FRONTEND_DIR, 'index.html')
+    # Force everyone without a session to login
+    if 'user_id' not in session:
+        return redirect('/login')
+    
+    # If they are authenticated, check what role they have
+    role = session.get('role', '')
+    routes = {
+        'admin': '/admin.html',
+        'counter': '/index.html',
+        'kitchen': '/kitchen.html'
+    }
+    return redirect(routes.get(role, '/login'))
 
 
 @app.route('/login')
@@ -139,6 +185,22 @@ def serve_login():
 
 @app.route('/<path:filename>')
 def serve_static(filename):
+    # Route protection logic
+    protected_routes = {
+        'admin.html': ['admin'],
+        'kitchen.html': ['admin', 'kitchen'],
+        'index.html': ['admin', 'counter']
+    }
+    
+    # If the user is trying to access a protected HTML file
+    if filename in protected_routes:
+        if 'user_id' not in session:
+            return redirect('/login')
+        
+        user_role = session.get('role')
+        if user_role not in protected_routes[filename]:
+            return redirect('/') # Redirect to their own default page
+
     return send_from_directory(FRONTEND_DIR, filename)
 
 
@@ -161,16 +223,43 @@ def get_menu():
 @app.route('/api/menu', methods=['POST'])
 @admin_required
 def add_menu_item():
-    """Add a new menu item. Body: {name, price, category?}"""
-    data = request.get_json()
-    if not data or not data.get('name') or data.get('price') is None:
-        return jsonify({'error': 'name and price are required'}), 400
-
+    """Add a new menu item. Body can be JSON or multipart/form-data for image upload."""
     conn = get_db()
-    cur = conn.execute(
-        'INSERT INTO menu (name, price, category) VALUES (?, ?, ?)',
-        (data['name'], float(data['price']), data.get('category', 'Fresh Juices'))
-    )
+    
+    # Handle multipart/form-data
+    if request.files or request.form:
+        name = request.form.get('name')
+        price = request.form.get('price')
+        category = request.form.get('category', 'Fresh Juices')
+        
+        if not name or price is None:
+            return jsonify({'error': 'name and price are required'}), 400
+            
+        image_url = None
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                # Generate unique filename
+                ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'jpg'
+                filename = f"{uuid.uuid4().hex}.{ext}"
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                image_url = f"/uploads/{filename}"
+                
+        cur = conn.execute(
+            'INSERT INTO menu (name, price, category, image_url) VALUES (?, ?, ?, ?)',
+            (name, float(price), category, image_url)
+        )
+    # Handle JSON
+    else:
+        data = request.get_json()
+        if not data or not data.get('name') or data.get('price') is None:
+            return jsonify({'error': 'name and price are required'}), 400
+
+        cur = conn.execute(
+            'INSERT INTO menu (name, price, category) VALUES (?, ?, ?)',
+            (data['name'], float(data['price']), data.get('category', 'Fresh Juices'))
+        )
+        
     conn.commit()
     item_id = cur.lastrowid
     conn.close()
@@ -180,23 +269,46 @@ def add_menu_item():
 @app.route('/api/menu/<int:item_id>', methods=['PUT'])
 @admin_required
 def update_menu_item(item_id):
-    """Update a menu item. Body: {name?, price?, category?}"""
-    data = request.get_json()
+    """Update a menu item. Body can be JSON or multipart/form-data."""
     conn = get_db()
     item = conn.execute('SELECT * FROM menu WHERE id = ?', (item_id,)).fetchone()
     if not item:
         conn.close()
         return jsonify({'error': 'Item not found'}), 404
 
-    conn.execute(
-        'UPDATE menu SET name = ?, price = ?, category = ? WHERE id = ?',
-        (
-            data.get('name', item['name']),
-            float(data.get('price', item['price'])),
-            data.get('category', item['category']),
-            item_id
+    # Handle multipart/form-data
+    if request.files or request.form:
+        name = request.form.get('name', item['name'])
+        price = request.form.get('price', item['price'])
+        category = request.form.get('category', item['category'])
+        
+        image_url = item['image_url']
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                # Optional: Delete old image here if replacing
+                ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'jpg'
+                filename = f"{uuid.uuid4().hex}.{ext}"
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                image_url = f"/uploads/{filename}"
+                
+        conn.execute(
+            'UPDATE menu SET name = ?, price = ?, category = ?, image_url = ? WHERE id = ?',
+            (name, float(price), category, image_url, item_id)
         )
-    )
+    # Handle JSON
+    else:
+        data = request.get_json()
+        conn.execute(
+            'UPDATE menu SET name = ?, price = ?, category = ? WHERE id = ?',
+            (
+                data.get('name', item['name']),
+                float(data.get('price', item['price'])),
+                data.get('category', item['category']),
+                item_id
+            )
+        )
+        
     conn.commit()
     conn.close()
     return jsonify({'message': 'Menu item updated'})
