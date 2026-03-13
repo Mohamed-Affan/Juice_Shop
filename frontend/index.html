@@ -184,121 +184,11 @@
             <!-- Menu Grid -->
             <div class="flex-1 overflow-y-auto no-scrollbar pr-2 pb-20">
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="menu-container">
-                    <!-- Cards will be populated here via JS to keep HTML clean, 
-                         but I will provide the raw HTML for 6 items directly for preview purposes -->
-                    
-                    <!-- Item 1 -->
-                    <div class="menu-card glass-panel cursor-pointer p-1 border-2 border-transparent relative overflow-hidden group">
-                        <div class="absolute top-2 right-2 bg-white/90 backdrop-blur rounded-lg px-2 py-1 z-10 font-bold text-sm text-gray-800 shadow-sm flex items-center gap-1">
-                            <i class="ph ph-currency-inr text-xs"></i> 60
-                        </div>
-                        <div class="h-32 bg-red-100 rounded-xl mb-3 overflow-hidden p-4 flex items-center justify-center relative">
-                            <!-- Geometric abstract fruit representation -->
-                            <div class="w-16 h-16 rounded-full bg-red-400 group-hover:scale-110 transition-transform duration-500 shadow-lg relative">
-                                <div class="absolute top-0 right-2 w-3 h-3 bg-red-800 rounded-full"></div>
-                            </div>
-                        </div>
-                        <div class="px-3 pb-3">
-                            <h3 class="font-bold text-gray-800">Watermelon</h3>
-                            <p class="text-sm font-medium text-brand-green tamil-text">தர்பூசணி சாறு</p>
-                            <div class="mt-2 text-xs text-gray-400 flex items-center gap-1">
-                                <i class="ph ph-thermometer-cold"></i> Chilled
-                            </div>
-                        </div>
+                    <!-- Populated dynamically from API -->
+                    <div class="col-span-full text-center text-gray-400 py-10">
+                        <i class="ph ph-spinner text-3xl animate-spin"></i>
+                        <p class="mt-2">Loading menu…</p>
                     </div>
-
-                    <!-- Item 2 -->
-                    <div class="menu-card glass-panel cursor-pointer p-1 border-2 border-transparent relative overflow-hidden group">
-                        <div class="absolute top-2 right-2 bg-white/90 backdrop-blur rounded-lg px-2 py-1 z-10 font-bold text-sm text-gray-800 shadow-sm flex items-center gap-1">
-                            <i class="ph ph-currency-inr text-xs"></i> 80
-                        </div>
-                        <div class="h-32 bg-yellow-100 rounded-xl mb-3 overflow-hidden p-4 flex items-center justify-center relative">
-                            <div class="w-14 h-18 rounded-tl-[40px] rounded-br-[40px] rounded-tr-lg rounded-bl-lg bg-yellow-400 group-hover:scale-110 transition-transform duration-500 shadow-lg"></div>
-                        </div>
-                        <div class="px-3 pb-3">
-                            <h3 class="font-bold text-gray-800">Mango Shake</h3>
-                            <p class="text-sm font-medium text-brand-green tamil-text">மாம்பழ ஷேக்</p>
-                            <div class="mt-2 text-xs text-gray-400 flex items-center gap-1">
-                                <i class="ph ph-drop"></i> Thick
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Item 3 -->
-                    <div class="menu-card glass-panel cursor-pointer p-1 border-2 border-transparent relative overflow-hidden group">
-                        <div class="absolute top-2 right-2 bg-white/90 backdrop-blur rounded-lg px-2 py-1 z-10 font-bold text-sm text-gray-800 shadow-sm flex items-center gap-1">
-                            <i class="ph ph-currency-inr text-xs"></i> 40
-                        </div>
-                        <div class="h-32 bg-green-100 rounded-xl mb-3 overflow-hidden p-4 flex items-center justify-center relative">
-                            <div class="w-14 h-14 rounded-full bg-green-400 group-hover:scale-110 transition-transform duration-500 shadow-lg flex items-center justify-center">
-                                <div class="w-10 h-10 rounded-full border-4 border-green-300"></div>
-                            </div>
-                        </div>
-                        <div class="px-3 pb-3">
-                            <h3 class="font-bold text-gray-800">Fresh Lime</h3>
-                            <p class="text-sm font-medium text-brand-green tamil-text">எலுமிச்சை சாறு</p>
-                            <div class="mt-2 text-xs text-gray-400 flex items-center gap-1">
-                                <i class="ph ph-ice-cream"></i> Refreshing
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Item 4 -->
-                    <div class="menu-card glass-panel cursor-pointer p-1 border-2 border-transparent relative overflow-hidden group">
-                        <div class="absolute top-2 right-2 bg-white/90 backdrop-blur rounded-lg px-2 py-1 z-10 font-bold text-sm text-gray-800 shadow-sm flex items-center gap-1">
-                            <i class="ph ph-currency-inr text-xs"></i> 70
-                        </div>
-                        <div class="h-32 bg-orange-100 rounded-xl mb-3 overflow-hidden p-4 flex items-center justify-center relative">
-                            <div class="w-16 h-16 rounded-full bg-orange-400 group-hover:scale-110 transition-transform duration-500 shadow-lg"></div>
-                        </div>
-                        <div class="px-3 pb-3">
-                            <h3 class="font-bold text-gray-800">Orange Juice</h3>
-                            <p class="text-sm font-medium text-brand-green tamil-text">ஆரஞ்சு சாறு</p>
-                            <div class="mt-2 text-xs text-gray-400 flex items-center gap-1">
-                                <i class="ph ph-leaf"></i> Vitamin C
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Item 5 -->
-                    <div class="menu-card glass-panel cursor-pointer p-1 border-2 border-transparent relative overflow-hidden group">
-                        <div class="absolute top-2 right-2 bg-white/90 backdrop-blur rounded-lg px-2 py-1 z-10 font-bold text-sm text-gray-800 shadow-sm flex items-center gap-1">
-                            <i class="ph ph-currency-inr text-xs"></i> 90
-                        </div>
-                        <div class="h-32 bg-rose-100 rounded-xl mb-3 overflow-hidden p-4 flex items-center justify-center relative">
-                            <div class="w-14 h-14 rounded-t-full bg-rose-500 group-hover:scale-110 transition-transform duration-500 shadow-lg"></div>
-                        </div>
-                        <div class="px-3 pb-3">
-                            <h3 class="font-bold text-gray-800">Apple Juice</h3>
-                            <p class="text-sm font-medium text-brand-green tamil-text">ஆப்பிள் சாறு</p>
-                            <div class="mt-2 text-xs text-gray-400 flex items-center gap-1">
-                                <i class="ph ph-heart"></i> Healthy
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Item 6 -->
-                    <div class="menu-card glass-panel cursor-pointer p-1 border-2 border-transparent relative overflow-hidden group">
-                        <div class="absolute top-2 right-2 bg-white/90 backdrop-blur rounded-lg px-2 py-1 z-10 font-bold text-sm text-gray-800 shadow-sm flex items-center gap-1">
-                            <i class="ph ph-currency-inr text-xs"></i> 85
-                        </div>
-                        <div class="h-32 bg-purple-100 rounded-xl mb-3 overflow-hidden p-4 flex items-center justify-center relative">
-                            <div class="flex flex-wrap w-16 h-16 gap-1 group-hover:scale-110 transition-transform duration-500">
-                                <div class="w-7 h-7 rounded-full bg-red-400"></div>
-                                <div class="w-7 h-7 rounded-full bg-orange-400"></div>
-                                <div class="w-7 h-7 rounded-full bg-green-400"></div>
-                                <div class="w-7 h-7 rounded-full bg-yellow-400"></div>
-                            </div>
-                        </div>
-                        <div class="px-3 pb-3">
-                            <h3 class="font-bold text-gray-800">Mixed Fruit</h3>
-                            <p class="text-sm font-medium text-brand-green tamil-text">கலவை பழச்சாறு</p>
-                            <div class="mt-2 text-xs text-gray-400 flex items-center gap-1">
-                                <i class="ph ph-sparkle"></i> Special
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -309,52 +199,22 @@
             <div class="bg-white/50 p-5 border-b border-gray-100 pb-4">
                 <div class="flex justify-between items-center mb-1">
                     <h2 class="text-xl font-bold text-gray-800">Current Order</h2>
-                    <span class="bg-brand-orange/10 text-brand-orange text-xs font-bold px-2 py-1 rounded-md">Order #204</span>
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs text-gray-500 font-medium">Table</label>
+                        <input type="number" id="table-number" min="1" max="50" value="1"
+                            class="w-14 text-center bg-brand-orange/10 text-brand-orange text-sm font-bold px-2 py-1 rounded-md border-0 focus:outline-none focus:ring-2 focus:ring-brand-orange/30">
+                    </div>
                 </div>
                 <p class="text-sm font-medium text-gray-500 tamil-text">தற்போதைய ஆணை</p>
             </div>
 
             <!-- Order Items List -->
             <div class="flex-1 overflow-y-auto no-scrollbar p-5 space-y-4" id="cart-container">
-                <!-- Cart Item Concept -->
-                <div class="flex items-center gap-3 animate-pop pb-4 border-b border-gray-100">
-                    <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
-                        <div class="w-6 h-8 rounded-tl-xl rounded-br-xl bg-yellow-400"></div>
-                    </div>
-                    <div class="flex-1">
-                        <h4 class="font-semibold text-gray-800 leading-tight">Mango Shake</h4>
-                        <p class="text-xs text-gray-400">No Sugar</p>
-                    </div>
-                    <div class="flex flex-col items-end gap-1">
-                        <div class="font-bold text-gray-800 flex items-center">
-                            <i class="ph ph-currency-inr text-xs"></i> 160
-                        </div>
-                        <div class="flex items-center bg-gray-100 rounded-lg p-0.5">
-                            <button class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-brand-orange hover:bg-white rounded shadow-sm"><i class="ph ph-minus text-xs"></i></button>
-                            <span class="w-6 text-center text-sm font-semibold">2</span>
-                            <button class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-brand-green hover:bg-white rounded shadow-sm"><i class="ph ph-plus text-xs"></i></button>
-                        </div>
-                    </div>
-                </div>
-
-                 <div class="flex items-center gap-3 animate-pop pb-4 border-b border-gray-100" style="animation-delay: 0.1s">
-                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                        <div class="w-7 h-7 rounded-full bg-red-400"></div>
-                    </div>
-                    <div class="flex-1">
-                        <h4 class="font-semibold text-gray-800 leading-tight">Watermelon</h4>
-                        <p class="text-xs text-gray-400">Ice</p>
-                    </div>
-                    <div class="flex flex-col items-end gap-1">
-                        <div class="font-bold text-gray-800 flex items-center">
-                            <i class="ph ph-currency-inr text-xs"></i> 60
-                        </div>
-                        <div class="flex items-center bg-gray-100 rounded-lg p-0.5">
-                            <button class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:text-brand-orange rounded shadow-sm"><i class="ph ph-minus text-xs"></i></button>
-                            <span class="w-6 text-center text-sm font-semibold">1</span>
-                            <button class="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-white hover:text-brand-green rounded shadow-sm"><i class="ph ph-plus text-xs"></i></button>
-                        </div>
-                    </div>
+                <!-- Empty state -->
+                <div id="cart-empty" class="flex flex-col items-center justify-center h-full text-gray-300">
+                    <i class="ph ph-shopping-cart-simple text-5xl mb-3"></i>
+                    <p class="font-medium text-gray-400">Tap items to add</p>
+                    <p class="text-sm tamil-text text-gray-300">பொருட்களைச் சேர்க்க தட்டவும்</p>
                 </div>
             </div>
 
@@ -364,57 +224,313 @@
                 <div class="space-y-2 mb-4">
                     <div class="flex justify-between text-sm text-gray-500 font-medium">
                         <span>Subtotal</span>
-                        <span class="flex items-center"><i class="ph ph-currency-inr text-xs mr-0.5"></i> 220.00</span>
+                        <span class="flex items-center" id="bill-subtotal"><i class="ph ph-currency-inr text-xs mr-0.5"></i> 0.00</span>
                     </div>
                     <div class="flex justify-between text-sm text-gray-500 font-medium">
                         <span>Tax (5%)</span>
-                        <span class="flex items-center"><i class="ph ph-currency-inr text-xs mr-0.5"></i> 11.00</span>
+                        <span class="flex items-center" id="bill-tax"><i class="ph ph-currency-inr text-xs mr-0.5"></i> 0.00</span>
                     </div>
                     <div class="border-t border-dashed border-gray-200 mt-2 pt-2 flex justify-between items-end">
                         <span class="text-base font-bold text-gray-800">Total <span class="tamil-text text-sm ml-1 text-gray-500 font-normal">மொத்தம்</span></span>
-                        <span class="text-2xl font-bold text-brand-dark flex items-center tracking-tight"><i class="ph ph-currency-inr mr-1"></i> 231.00</span>
+                        <span class="text-2xl font-bold text-brand-dark flex items-center tracking-tight" id="bill-total"><i class="ph ph-currency-inr mr-1"></i> 0.00</span>
                     </div>
                 </div>
 
                 <!-- Payment Methods -->
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <button class="py-2.5 rounded-xl border-2 border-brand-green bg-green-50 text-brand-green font-semibold flex items-center justify-center gap-2 transition-all">
+                <div class="grid grid-cols-2 gap-3 mb-4" id="payment-methods">
+                    <button onclick="selectPayment('cash')" id="pay-cash"
+                        class="py-2.5 rounded-xl border-2 border-brand-green bg-green-50 text-brand-green font-semibold flex items-center justify-center gap-2 transition-all">
                         <i class="ph ph-money text-xl"></i> Cash
                     </button>
-                    <button class="py-2.5 rounded-xl border-2 border-gray-200 text-gray-500 font-semibold hover:border-gray-300 flex items-center justify-center gap-2 transition-all">
+                    <button onclick="selectPayment('upi')" id="pay-upi"
+                        class="py-2.5 rounded-xl border-2 border-gray-200 text-gray-500 font-semibold hover:border-gray-300 flex items-center justify-center gap-2 transition-all">
                         <i class="ph ph-qr-code text-xl"></i> UPI / Card
                     </button>
                 </div>
 
-                <div class="grid grid-cols-4 gap-2 mb-4">
-                     <button class="py-2 rounded-lg bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 text-sm">Takeout</button>
-                     <button class="py-2 rounded-lg bg-gray-800 text-white font-medium shadow-sm text-sm">Dine-in</button>
+                <div class="grid grid-cols-4 gap-2 mb-4" id="order-types">
+                     <button onclick="selectOrderType('takeout')" id="type-takeout"
+                        class="py-2 rounded-lg bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 text-sm">Takeout</button>
+                     <button onclick="selectOrderType('dine-in')" id="type-dine-in"
+                        class="py-2 rounded-lg bg-gray-800 text-white font-medium shadow-sm text-sm">Dine-in</button>
                 </div>
 
-                <button class="w-full btn-success text-white py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2">
+                <button onclick="placeOrder()" id="place-order-btn"
+                    class="w-full btn-success text-white py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                     <i class="ph ph-check-circle text-xl"></i> Place Order
                 </button>
             </div>
         </div>
     </main>
 
+    <!-- Toast notification -->
+    <div id="toast" class="fixed top-6 right-6 z-50 hidden">
+        <div class="glass-panel shadow-lg px-5 py-4 flex items-center gap-3 min-w-[280px]">
+            <i id="toast-icon" class="ph ph-check-circle text-2xl text-brand-green"></i>
+            <div>
+                <p id="toast-message" class="font-semibold text-gray-800"></p>
+                <p id="toast-sub" class="text-xs text-gray-400"></p>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Update Time
+        // ── Configuration ─────────────────────────────────────────────────
+        const API_BASE = '';  // same origin when served by Flask
+
+        // ── State ─────────────────────────────────────────────────────────
+        let menuItems = [];
+        let cart = [];  // [{id, name, price, quantity}]
+        let selectedPayment = 'cash';
+        let selectedOrderType = 'dine-in';
+        let activeCategory = 'All';
+
+        // ── Visual config per item (preserves original design aesthetic) ──
+        const itemStyles = {
+            'Watermelon':   { bg: 'bg-red-100',    shape: 'w-16 h-16 rounded-full bg-red-400', icon: 'ph-thermometer-cold', tag: 'Chilled' },
+            'Mango Shake':  { bg: 'bg-yellow-100',  shape: 'w-14 h-18 rounded-tl-[40px] rounded-br-[40px] rounded-tr-lg rounded-bl-lg bg-yellow-400', icon: 'ph-drop', tag: 'Thick' },
+            'Fresh Lime':   { bg: 'bg-green-100',   shape: 'w-14 h-14 rounded-full bg-green-400', icon: 'ph-ice-cream', tag: 'Refreshing' },
+            'Orange Juice': { bg: 'bg-orange-100',  shape: 'w-16 h-16 rounded-full bg-orange-400', icon: 'ph-leaf', tag: 'Vitamin C' },
+            'Apple Juice':  { bg: 'bg-rose-100',    shape: 'w-14 h-14 rounded-t-full bg-rose-500', icon: 'ph-heart', tag: 'Healthy' },
+            'Mixed Fruit':  { bg: 'bg-purple-100',  shape: 'mixed', icon: 'ph-sparkle', tag: 'Special' },
+        };
+        const defaultStyle = { bg: 'bg-gray-100', shape: 'w-14 h-14 rounded-full bg-gray-400', icon: 'ph-drop', tag: 'Fresh' };
+
+        // ── Clock ─────────────────────────────────────────────────────────
         function updateTime() {
             const now = new Date();
             let hours = now.getHours();
             let minutes = now.getMinutes();
             const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; 
+            hours = hours % 12 || 12;
             minutes = minutes < 10 ? '0' + minutes : minutes;
             document.getElementById('current-time').innerText = hours + ':' + minutes + ' ' + ampm;
-            
             const options = { weekday: 'short', month: 'short', day: 'numeric' };
             document.getElementById('current-date').innerText = now.toLocaleDateString('en-US', options);
         }
         setInterval(updateTime, 1000);
         updateTime();
+
+        // ── Toast ─────────────────────────────────────────────────────────
+        function showToast(msg, sub = '', isError = false) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            document.getElementById('toast-sub').textContent = sub;
+            const icon = document.getElementById('toast-icon');
+            icon.className = isError
+                ? 'ph ph-warning-circle text-2xl text-red-500'
+                : 'ph ph-check-circle text-2xl text-brand-green';
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 3500);
+        }
+
+        // ── Menu Loading ──────────────────────────────────────────────────
+        async function loadMenu(category) {
+            const container = document.getElementById('menu-container');
+            try {
+                let url = API_BASE + '/api/menu';
+                if (category && category !== 'All') url += '?category=' + encodeURIComponent(category);
+                const res = await fetch(url);
+                menuItems = await res.json();
+                renderMenu();
+            } catch (e) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center text-red-400 py-10">
+                        <i class="ph ph-wifi-slash text-3xl"></i>
+                        <p class="mt-2">Could not load menu. Is the backend running?</p>
+                    </div>`;
+            }
+        }
+
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            if (!menuItems.length) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center text-gray-400 py-10">
+                        <i class="ph ph-bowl-food text-3xl"></i>
+                        <p class="mt-2">No items found</p>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = menuItems.map(item => {
+                const s = itemStyles[item.name] || defaultStyle;
+                const shapeHtml = s.shape === 'mixed'
+                    ? `<div class="flex flex-wrap w-16 h-16 gap-1 group-hover:scale-110 transition-transform duration-500">
+                         <div class="w-7 h-7 rounded-full bg-red-400"></div><div class="w-7 h-7 rounded-full bg-orange-400"></div>
+                         <div class="w-7 h-7 rounded-full bg-green-400"></div><div class="w-7 h-7 rounded-full bg-yellow-400"></div></div>`
+                    : `<div class="${s.shape} group-hover:scale-110 transition-transform duration-500 shadow-lg"></div>`;
+                return `
+                <div class="menu-card glass-panel cursor-pointer p-1 border-2 border-transparent relative overflow-hidden group"
+                     onclick="addToCart(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.price})">
+                    <div class="absolute top-2 right-2 bg-white/90 backdrop-blur rounded-lg px-2 py-1 z-10 font-bold text-sm text-gray-800 shadow-sm flex items-center gap-1">
+                        <i class="ph ph-currency-inr text-xs"></i> ${item.price}
+                    </div>
+                    <div class="h-32 ${s.bg} rounded-xl mb-3 overflow-hidden p-4 flex items-center justify-center relative">
+                        ${shapeHtml}
+                    </div>
+                    <div class="px-3 pb-3">
+                        <h3 class="font-bold text-gray-800">${item.name}</h3>
+                        <div class="mt-2 text-xs text-gray-400 flex items-center gap-1">
+                            <i class="ph ${s.icon}"></i> ${s.tag}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ── Category Filtering ────────────────────────────────────────────
+        document.querySelectorAll('.no-scrollbar button').forEach(btn => {
+            btn.addEventListener('click', function () {
+                // Extract category name (text before the Tamil span)
+                const raw = this.textContent.trim().split('\n')[0].trim();
+                const category = raw.includes('All') ? 'All' : raw.split(/\s{2,}/)[0].trim();
+                activeCategory = category;
+                // Update button styles
+                document.querySelectorAll('.no-scrollbar button').forEach(b => {
+                    b.className = 'px-6 py-2.5 rounded-full bg-white text-gray-600 border border-gray-200 font-medium whitespace-nowrap hover:bg-gray-50 transition-colors shadow-sm';
+                });
+                this.className = 'px-6 py-2.5 rounded-full bg-brand-dark text-white font-medium whitespace-nowrap shadow-md transition-transform hover:scale-105';
+                loadMenu(category === 'All' ? null : category);
+            });
+        });
+
+        // ── Cart Management ───────────────────────────────────────────────
+        function addToCart(id, name, price) {
+            const existing = cart.find(c => c.id === id);
+            if (existing) {
+                existing.quantity++;
+            } else {
+                cart.push({ id, name, price, quantity: 1 });
+            }
+            renderCart();
+        }
+
+        function changeQty(id, delta) {
+            const item = cart.find(c => c.id === id);
+            if (!item) return;
+            item.quantity += delta;
+            if (item.quantity <= 0) cart = cart.filter(c => c.id !== id);
+            renderCart();
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-container');
+            const emptyEl = document.getElementById('cart-empty');
+            const orderBtn = document.getElementById('place-order-btn');
+
+            if (!cart.length) {
+                container.innerHTML = `
+                    <div id="cart-empty" class="flex flex-col items-center justify-center h-full text-gray-300">
+                        <i class="ph ph-shopping-cart-simple text-5xl mb-3"></i>
+                        <p class="font-medium text-gray-400">Tap items to add</p>
+                        <p class="text-sm tamil-text text-gray-300">பொருட்களைச் சேர்க்க தட்டவும்</p>
+                    </div>`;
+                orderBtn.disabled = true;
+                updateBilling(0);
+                return;
+            }
+
+            orderBtn.disabled = false;
+            const s = itemStyles;
+            container.innerHTML = cart.map((item, i) => {
+                const style = s[item.name] || defaultStyle;
+                const lineTotal = item.price * item.quantity;
+                return `
+                <div class="flex items-center gap-3 animate-pop pb-4 border-b border-gray-100" style="animation-delay:${i*0.05}s">
+                    <div class="w-12 h-12 ${style.bg} rounded-xl flex items-center justify-center">
+                        <div class="${(style.shape === 'mixed' ? 'w-6 h-6 rounded-full bg-purple-400' : style.shape.replace(/w-1[46]/g,'w-6').replace(/h-1[468]/g,'h-6'))}"></div>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-semibold text-gray-800 leading-tight">${item.name}</h4>
+                        <p class="text-xs text-gray-400">₹${item.price} each</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                        <div class="font-bold text-gray-800 flex items-center">
+                            <i class="ph ph-currency-inr text-xs"></i> ${lineTotal}
+                        </div>
+                        <div class="flex items-center bg-gray-100 rounded-lg p-0.5">
+                            <button onclick="changeQty(${item.id}, -1)"
+                                class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-brand-orange hover:bg-white rounded shadow-sm">
+                                <i class="ph ph-minus text-xs"></i></button>
+                            <span class="w-6 text-center text-sm font-semibold">${item.quantity}</span>
+                            <button onclick="changeQty(${item.id}, 1)"
+                                class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-brand-green hover:bg-white rounded shadow-sm">
+                                <i class="ph ph-plus text-xs"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            const subtotal = cart.reduce((sum, c) => sum + c.price * c.quantity, 0);
+            updateBilling(subtotal);
+        }
+
+        function updateBilling(subtotal) {
+            const tax = Math.round(subtotal * 0.05 * 100) / 100;
+            const total = subtotal + tax;
+            document.getElementById('bill-subtotal').innerHTML = `<i class="ph ph-currency-inr text-xs mr-0.5"></i> ${subtotal.toFixed(2)}`;
+            document.getElementById('bill-tax').innerHTML = `<i class="ph ph-currency-inr text-xs mr-0.5"></i> ${tax.toFixed(2)}`;
+            document.getElementById('bill-total').innerHTML = `<i class="ph ph-currency-inr mr-1"></i> ${total.toFixed(2)}`;
+        }
+
+        // ── Payment & Order Type Selectors ────────────────────────────────
+        function selectPayment(method) {
+            selectedPayment = method;
+            document.getElementById('pay-cash').className = method === 'cash'
+                ? 'py-2.5 rounded-xl border-2 border-brand-green bg-green-50 text-brand-green font-semibold flex items-center justify-center gap-2 transition-all'
+                : 'py-2.5 rounded-xl border-2 border-gray-200 text-gray-500 font-semibold hover:border-gray-300 flex items-center justify-center gap-2 transition-all';
+            document.getElementById('pay-upi').className = method === 'upi'
+                ? 'py-2.5 rounded-xl border-2 border-brand-green bg-green-50 text-brand-green font-semibold flex items-center justify-center gap-2 transition-all'
+                : 'py-2.5 rounded-xl border-2 border-gray-200 text-gray-500 font-semibold hover:border-gray-300 flex items-center justify-center gap-2 transition-all';
+        }
+
+        function selectOrderType(type) {
+            selectedOrderType = type;
+            document.getElementById('type-takeout').className = type === 'takeout'
+                ? 'py-2 rounded-lg bg-gray-800 text-white font-medium shadow-sm text-sm'
+                : 'py-2 rounded-lg bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 text-sm';
+            document.getElementById('type-dine-in').className = type === 'dine-in'
+                ? 'py-2 rounded-lg bg-gray-800 text-white font-medium shadow-sm text-sm'
+                : 'py-2 rounded-lg bg-gray-100 text-gray-600 font-medium hover:bg-gray-200 text-sm';
+        }
+
+        // ── Place Order ───────────────────────────────────────────────────
+        async function placeOrder() {
+            if (!cart.length) return;
+            const btn = document.getElementById('place-order-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ph ph-spinner text-xl animate-spin"></i> Placing…';
+
+            const payload = {
+                table_number: parseInt(document.getElementById('table-number').value) || 1,
+                items: cart.map(c => ({ menu_id: c.id, quantity: c.quantity })),
+                payment_method: selectedPayment,
+                order_type: selectedOrderType,
+            };
+
+            try {
+                const res = await fetch(API_BASE + '/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Order placed!', `Order #${data.id} — ₹${data.total_amount}`);
+                    cart = [];
+                    renderCart();
+                } else {
+                    showToast(data.error || 'Failed to place order', '', true);
+                }
+            } catch (e) {
+                showToast('Network error', 'Is the server running?', true);
+            }
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ph ph-check-circle text-xl"></i> Place Order';
+        }
+
+        // ── Init ──────────────────────────────────────────────────────────
+        loadMenu();
     </script>
 </body>
 </html>
