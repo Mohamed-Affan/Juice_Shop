@@ -604,10 +604,28 @@ td.actions {
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
+    transition: all 0.5s ease;
 }
 
 .order-ticket.preparing {
-    border-top-color: #f59e0b; /* Amber/Orange */
+    border-top-color: #3b82f6; /* Blue for preparing */
+}
+
+.order-ticket.urgent {
+    border-top-color: #f59e0b; /* Amber/Orange for > 5 min */
+    background-color: #fffbeb;
+}
+
+.order-ticket.critical {
+    border-top-color: var(--danger); /* Red for > 10 min */
+    background-color: #fef2f2;
+    animation: ticket-pulse 2s infinite;
+}
+
+@keyframes ticket-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
 .order-ticket-header {

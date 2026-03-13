@@ -424,7 +424,7 @@
                     // Redirect based on role
                     const routes = {
                         admin: '/admin.html',
-                        counter: '/counter.html',
+                        counter: '/index.html',
                         kitchen: '/kitchen.html'
                     };
                     window.location.href = routes[data.role] || '/';
@@ -446,7 +446,7 @@
                 if (res.ok) {
                     const data = await res.json();
                     if (data.authenticated) {
-                        const routes = { admin: '/admin.html', counter: '/counter.html', kitchen: '/kitchen.html' };
+                        const routes = { admin: '/admin.html', counter: '/index.html', kitchen: '/kitchen.html' };
                         window.location.href = routes[data.role] || '/';
                     }
                 }

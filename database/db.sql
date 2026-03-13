@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS menu (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     price REAL NOT NULL,
-    category TEXT DEFAULT 'Fresh Juices'
+    category TEXT DEFAULT 'Fresh Juices',
+    image_url TEXT
 );
 
 CREATE TABLE IF NOT EXISTS orders (
@@ -35,13 +36,13 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Seed default menu items (matching frontend)
-INSERT OR IGNORE INTO menu (id, name, price, category) VALUES
-    (1, 'Watermelon', 60, 'Fresh Juices'),
-    (2, 'Mango Shake', 80, 'Milkshakes'),
-    (3, 'Fresh Lime', 40, 'Fresh Juices'),
-    (4, 'Orange Juice', 70, 'Fresh Juices'),
-    (5, 'Apple Juice', 90, 'Fresh Juices'),
-    (6, 'Mixed Fruit', 85, 'Smoothies');
+INSERT OR IGNORE INTO menu (id, name, price, category, image_url) VALUES
+    (1, 'Watermelon', 60, 'Fresh Juices', NULL),
+    (2, 'Mango Shake', 80, 'Milkshakes', NULL),
+    (3, 'Fresh Lime', 40, 'Fresh Juices', NULL),
+    (4, 'Orange Juice', 70, 'Fresh Juices', NULL),
+    (5, 'Apple Juice', 90, 'Fresh Juices', NULL),
+    (6, 'Mixed Fruit', 85, 'Smoothies', NULL);
 
 -- Seed default users (passwords will be hashed at runtime by init_db)
 -- admin/admin123, counter/counter123, kitchen/kitchen123

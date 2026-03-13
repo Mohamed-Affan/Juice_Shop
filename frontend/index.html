@@ -132,31 +132,17 @@
             </div>
         </div>
         
-        <!-- Center Tabs -->
-        <nav class="hidden md:flex space-x-2 bg-gray-100/80 p-1 rounded-xl glass-panel">
-            <button class="px-5 py-2 rounded-lg bg-white shadow-sm text-brand-orange font-semibold transition-colors flex items-center gap-2">
-                <i class="ph ph-cash-register text-lg"></i>
-                POS
-            </button>
-            <button class="px-5 py-2 rounded-lg text-gray-500 hover:text-gray-800 font-medium transition-colors flex items-center gap-2 hover:bg-white/50">
-                <i class="ph ph-cooking-pot text-lg"></i>
-                Kitchen
-                <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full ml-1">3</span>
-            </button>
-            <button class="px-5 py-2 rounded-lg text-gray-500 hover:text-gray-800 font-medium transition-colors flex items-center gap-2 hover:bg-white/50">
-                <i class="ph ph-chart-line-up text-lg"></i>
-                Dashboard
-            </button>
-        </nav>
+
 
         <div class="flex items-center gap-4">
-            <div class="text-right hidden sm:block">
-                <p class="font-semibold text-gray-800" id="current-time">10:45 AM</p>
-                <p class="text-xs text-gray-500 font-medium" id="current-date">Wed, Oct 25</p>
-            </div>
-            <div class="w-10 h-10 rounded-full border-2 border-brand-green overflow-hidden cursor-pointer">
-                <img src="https://i.pravatar.cc/150?img=11" alt="User" class="w-full h-full object-cover">
-            </div>
+            <a href="admin.html" id="dashboard-btn" class="hidden px-5 py-2 rounded-lg bg-blue-50 text-brand-dark hover:bg-white font-semibold transition-colors flex items-center gap-2 shadow-sm border border-gray-200">
+                <i class="ph ph-squares-four text-lg text-blue-600"></i>
+                Dashboard
+            </a>
+            <button onclick="doLogout()" class="px-5 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 font-semibold transition-colors flex items-center gap-2 shadow-sm border border-red-200">
+                <i class="ph ph-sign-out text-lg"></i>
+                Logout
+            </button>
         </div>
     </header>
 
@@ -256,8 +242,12 @@
                 </div>
 
                 <button onclick="placeOrder()" id="place-order-btn"
-                    class="w-full btn-success text-white py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    class="w-full btn-success text-white py-3 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 mb-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                     <i class="ph ph-check-circle text-xl"></i> Place Order
+                </button>
+                <button onclick="printBill()" id="print-bill-btn"
+                    class="w-full bg-blue-50 text-blue-600 border border-blue-200 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <i class="ph ph-printer text-xl"></i> Print Bill
                 </button>
             </div>
         </div>
@@ -295,21 +285,6 @@
             'Mixed Fruit':  { bg: 'bg-purple-100',  shape: 'mixed', icon: 'ph-sparkle', tag: 'Special' },
         };
         const defaultStyle = { bg: 'bg-gray-100', shape: 'w-14 h-14 rounded-full bg-gray-400', icon: 'ph-drop', tag: 'Fresh' };
-
-        // ── Clock ─────────────────────────────────────────────────────────
-        function updateTime() {
-            const now = new Date();
-            let hours = now.getHours();
-            let minutes = now.getMinutes();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12;
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            document.getElementById('current-time').innerText = hours + ':' + minutes + ' ' + ampm;
-            const options = { weekday: 'short', month: 'short', day: 'numeric' };
-            document.getElementById('current-date').innerText = now.toLocaleDateString('en-US', options);
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
 
         // ── Toast ─────────────────────────────────────────────────────────
         function showToast(msg, sub = '', isError = false) {
@@ -354,19 +329,26 @@
             }
             container.innerHTML = menuItems.map(item => {
                 const s = itemStyles[item.name] || defaultStyle;
-                const shapeHtml = s.shape === 'mixed'
-                    ? `<div class="flex flex-wrap w-16 h-16 gap-1 group-hover:scale-110 transition-transform duration-500">
-                         <div class="w-7 h-7 rounded-full bg-red-400"></div><div class="w-7 h-7 rounded-full bg-orange-400"></div>
-                         <div class="w-7 h-7 rounded-full bg-green-400"></div><div class="w-7 h-7 rounded-full bg-yellow-400"></div></div>`
-                    : `<div class="${s.shape} group-hover:scale-110 transition-transform duration-500 shadow-lg"></div>`;
+                
+                let visualHtml;
+                if (item.image_url) {
+                    visualHtml = `<img src="${item.image_url}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 shadow-lg" style="border-radius: inherit;" alt="${item.name}">`;
+                } else {
+                    visualHtml = s.shape === 'mixed'
+                        ? `<div class="flex flex-wrap w-16 h-16 gap-1 group-hover:scale-110 transition-transform duration-500">
+                             <div class="w-7 h-7 rounded-full bg-red-400"></div><div class="w-7 h-7 rounded-full bg-orange-400"></div>
+                             <div class="w-7 h-7 rounded-full bg-green-400"></div><div class="w-7 h-7 rounded-full bg-yellow-400"></div></div>`
+                        : `<div class="${s.shape} group-hover:scale-110 transition-transform duration-500 shadow-lg"></div>`;
+                }
+
                 return `
                 <div class="menu-card glass-panel cursor-pointer p-1 border-2 border-transparent relative overflow-hidden group"
-                     onclick="addToCart(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.price})">
+                     onclick="addToCart(${item.id}, '${item.name.replace(/'/g, "\\'")}', ${item.price}, '${item.image_url || ''}')">
                     <div class="absolute top-2 right-2 bg-white/90 backdrop-blur rounded-lg px-2 py-1 z-10 font-bold text-sm text-gray-800 shadow-sm flex items-center gap-1">
                         <i class="ph ph-currency-inr text-xs"></i> ${item.price}
                     </div>
-                    <div class="h-32 ${s.bg} rounded-xl mb-3 overflow-hidden p-4 flex items-center justify-center relative">
-                        ${shapeHtml}
+                    <div class="h-32 ${item.image_url ? 'bg-transparent' : s.bg} rounded-xl mb-3 overflow-hidden ${item.image_url ? '' : 'p-4'} flex items-center justify-center relative">
+                        ${visualHtml}
                     </div>
                     <div class="px-3 pb-3">
                         <h3 class="font-bold text-gray-800">${item.name}</h3>
@@ -395,12 +377,12 @@
         });
 
         // ── Cart Management ───────────────────────────────────────────────
-        function addToCart(id, name, price) {
+        function addToCart(id, name, price, imageUrl) {
             const existing = cart.find(c => c.id === id);
             if (existing) {
                 existing.quantity++;
             } else {
-                cart.push({ id, name, price, quantity: 1 });
+                cart.push({ id, name, price, quantity: 1, image_url: imageUrl });
             }
             renderCart();
         }
@@ -426,19 +408,32 @@
                         <p class="text-sm tamil-text text-gray-300">பொருட்களைச் சேர்க்க தட்டவும்</p>
                     </div>`;
                 orderBtn.disabled = true;
+                document.getElementById('print-bill-btn').disabled = true;
                 updateBilling(0);
                 return;
             }
 
             orderBtn.disabled = false;
+            document.getElementById('print-bill-btn').disabled = false;
             const s = itemStyles;
             container.innerHTML = cart.map((item, i) => {
                 const style = s[item.name] || defaultStyle;
                 const lineTotal = item.price * item.quantity;
+                
+                let thumbHtml = '';
+                if (item.image_url) {
+                    thumbHtml = `<img src="${item.image_url}" class="w-full h-full object-cover">`;
+                } else {
+                    const innerShape = style.shape === 'mixed' 
+                        ? 'w-6 h-6 rounded-full bg-purple-400' 
+                        : style.shape.replace(/w-1[46]/g,'w-6').replace(/h-1[468]/g,'h-6');
+                    thumbHtml = `<div class="${innerShape}"></div>`;
+                }
+                
                 return `
                 <div class="flex items-center gap-3 animate-pop pb-4 border-b border-gray-100" style="animation-delay:${i*0.05}s">
-                    <div class="w-12 h-12 ${style.bg} rounded-xl flex items-center justify-center">
-                        <div class="${(style.shape === 'mixed' ? 'w-6 h-6 rounded-full bg-purple-400' : style.shape.replace(/w-1[46]/g,'w-6').replace(/h-1[468]/g,'h-6'))}"></div>
+                    <div class="w-12 h-12 ${item.image_url ? 'bg-transparent' : style.bg} rounded-xl flex items-center justify-center overflow-hidden">
+                        ${thumbHtml}
                     </div>
                     <div class="flex-1">
                         <h4 class="font-semibold text-gray-800 leading-tight">${item.name}</h4>
@@ -529,7 +524,108 @@
             btn.innerHTML = '<i class="ph ph-check-circle text-xl"></i> Place Order';
         }
 
+        // ── Print Bill ────────────────────────────────────────────────────
+        function printBill() {
+            if (!cart.length) return;
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString();
+            const timeStr = now.toLocaleTimeString();
+            const tableNum = document.getElementById('table-number').value || '1';
+            
+            const subtotal = cart.reduce((sum, c) => sum + c.price * c.quantity, 0);
+            const tax = Math.round(subtotal * 0.05 * 100) / 100;
+            const total = subtotal + tax;
+
+            let itemsHtml = '';
+            cart.forEach(c => {
+                itemsHtml += `
+                    <tr>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ccc;">${c.name}<br><small>x${c.quantity}</small></td>
+                        <td style="padding: 8px 0; border-bottom: 1px dashed #ccc; text-align: right;">₹${(c.price * c.quantity).toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            const printContent = `
+                <html>
+                <head>
+                    <title>Print Bill - Juice Shop</title>
+                    <style>
+                        body { font-family: monospace; padding: 20px; max-width: 300px; margin: 0 auto; color: #000; }
+                        h1 { text-align: center; font-size: 24px; margin-bottom: 5px; }
+                        .subtitle { text-align: center; font-size: 14px; margin-bottom: 20px; color: #555; }
+                        .meta { font-size: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        .totals { width: 100%; text-align: right; }
+                        .totals div { margin-bottom: 5px; }
+                        .grand-total { font-size: 18px; font-weight: bold; border-top: 2px dashed #000; padding-top: 10px; margin-top: 10px; }
+                        .footer { text-align: center; margin-top: 30px; font-size: 12px; font-style: italic; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Fresh Juice Shop</h1>
+                    <div class="subtitle">Refresh Your Day!</div>
+                    
+                    <div class="meta">
+                        <div><strong>Date:</strong> ${dateStr}</div>
+                        <div><strong>Time:</strong> ${timeStr}</div>
+                        <div><strong>Order Type:</strong> ${selectedOrderType === 'takeout' ? 'Takeout' : 'Dine-in (Table ' + tableNum + ')'}</div>
+                        <div><strong>Payment:</strong> ${selectedPayment.toUpperCase()}</div>
+                    </div>
+
+                    <table>
+                        ${itemsHtml}
+                    </table>
+
+                    <div class="totals">
+                        <div>Subtotal: ₹${subtotal.toFixed(2)}</div>
+                        <div>Tax (5%): ₹${tax.toFixed(2)}</div>
+                        <div class="grand-total">Total: ₹${total.toFixed(2)}</div>
+                    </div>
+
+                    <div class="footer">Thank you for visiting!</div>
+                    
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(function() { window.close(); }, 500);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+
+            const printWin = window.open('', '_blank');
+            printWin.document.open();
+            printWin.document.write(printContent);
+            printWin.document.close();
+        }
+
+        // ── Auth & Role Check ──────────────────────────────────────────────
+        async function doLogout() {
+            try {
+                await fetch(API_BASE + '/api/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function checkRole() {
+            try {
+                const res = await fetch(API_BASE + '/api/auth/check');
+                const authData = await res.json();
+                if (authData.role === 'admin') {
+                    document.getElementById('dashboard-btn').classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error('Failed to verify role', e);
+            }
+        }
+
         // ── Init ──────────────────────────────────────────────────────────
+        checkRole();
         loadMenu();
     </script>
 </body>
