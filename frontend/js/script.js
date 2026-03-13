@@ -414,25 +414,51 @@ async function submitOrder() {
 
 let kitchenOrders = [];
 let kitchenTimerInterval = null;
+let knownOrderIds = new Set(); // Track known orders for sound alerts
+let newlyArrivedOrderIds = new Set(); // Track new orders to highlight
 
 async function initKitchen() {
-    await loadKitchenOrders();
+    await loadKitchenOrders(true); // Initial load, don't trigger sound
 
     // Refresh orders every 5 seconds
-    setInterval(loadKitchenOrders, 5000);
+    setInterval(() => loadKitchenOrders(false), 5000);
 
     // Update timers every second
     if (kitchenTimerInterval) clearInterval(kitchenTimerInterval);
     kitchenTimerInterval = setInterval(updateKitchenTimers, 1000);
 }
 
-async function loadKitchenOrders() {
+async function loadKitchenOrders(isInitialLoad = false) {
     try {
         // Fetch pending & preparing orders
         const res = await fetch(API_BASE + '/api/orders', { credentials: 'same-origin' });
         const allOrders = await res.json();
         // Only show pending and preparing
         kitchenOrders = allOrders.filter(o => o.status === 'pending' || o.status === 'preparing');
+        
+        // Check for new orders
+        let hasNewOrders = false;
+        if (!isInitialLoad) {
+            kitchenOrders.forEach(o => {
+                if (!knownOrderIds.has(o.id)) {
+                    hasNewOrders = true;
+                    newlyArrivedOrderIds.add(o.id);
+                }
+            });
+        }
+
+        // Update known IDs
+        knownOrderIds.clear();
+        kitchenOrders.forEach(o => knownOrderIds.add(o.id));
+
+        if (hasNewOrders) {
+            const alertSound = document.getElementById('order-alert-sound');
+            if (alertSound) {
+                alertSound.currentTime = 0;
+                alertSound.play().catch(e => console.log('Audio play failed (maybe no interaction yet):', e));
+            }
+        }
+
         renderKitchenGrid();
     } catch (e) {
         console.error('Failed to load kitchen orders:', e);
@@ -457,7 +483,15 @@ function renderKitchenGrid() {
 
     kitchenOrders.forEach(order => {
         const ticket = document.createElement('div');
-        ticket.className = `order-ticket ${order.status}`;
+        
+        let highlightClass = '';
+        if (newlyArrivedOrderIds.has(order.id)) {
+            highlightClass = 'new-order-highlight';
+            newlyArrivedOrderIds.delete(order.id); // Remove after highlighting once
+        }
+        
+        ticket.className = `order-ticket ${order.status} ${highlightClass}`;
+        ticket.id = `ticket-${order.id}`;
 
         // Parse items from items_summary string (e.g. "Mango Shake x2, Fresh Lime x1")
         let itemsHtml = '';
@@ -514,10 +548,20 @@ function updateKitchenTimers() {
             textSpan.textContent = `${mins}:${secs}`;
         }
 
-        if (diffSeconds > 600) {
-            timerEl.classList.add('urgent');
-        } else {
-            timerEl.classList.remove('urgent');
+        // Color coding logic based on elapsed time
+        const ticketEl = document.getElementById(`ticket-${order.id}`);
+        if (ticketEl) {
+            // Remove previous timer classes
+            ticketEl.classList.remove('timer-green', 'timer-yellow', 'timer-red');
+            
+            const diffMinutes = diffSeconds / 60;
+            if (diffMinutes >= 15) {
+                ticketEl.classList.add('timer-red');
+            } else if (diffMinutes >= 7) {
+                ticketEl.classList.add('timer-yellow');
+            } else {
+                ticketEl.classList.add('timer-green');
+            }
         }
     });
 }
