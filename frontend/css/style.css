@@ -660,8 +660,7 @@ td.actions {
 
 .new-order-highlight {
     animation: highlight-pulse 1s ease-out;
-    =======transition: all 0.5s ease;
-
+    transition: all 0.5s ease;
 }
 
 .order-ticket.preparing {
