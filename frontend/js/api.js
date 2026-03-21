@@ -1,15 +1,84 @@
-// API helper functions
+// API helper functions with JWT Injection
 const api = {
-    get: async (endpoint) => {
-        const res = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`);
+    getHeaders: () => {
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (token) {
+            headers['Authorization'] = token;
+        }
+        return headers;
+    },
+
+    handleResponse: async (res) => {
+        if (!res.ok) {
+            if (res.status === 401 || res.status === 403) {
+                // Unauthorized, clear token and redirect to login
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+                throw new Error('Unauthorized');
+            }
+            if(res.status === 429) {
+                throw new Error('Too many requests. Please try again later.');
+            }
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.message || data.error || 'Something went wrong. Please try again.');
+        }
         return res.json();
     },
+
+    get: async (endpoint) => {
+        try {
+            const res = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
+                headers: api.getHeaders()
+            });
+            return await api.handleResponse(res);
+        } catch (error) {
+            console.error('API GET Error:', error);
+            throw error;
+        }
+    },
+
     post: async (endpoint, data) => {
-        const res = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        return res.json();
+        try {
+            const res = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
+                method: 'POST',
+                headers: api.getHeaders(),
+                body: JSON.stringify(data)
+            });
+            return await api.handleResponse(res);
+        } catch (error) {
+            console.error('API POST Error:', error);
+            throw error;
+        }
+    },
+    
+    put: async (endpoint, data) => {
+        try {
+            const res = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
+                method: 'PUT',
+                headers: api.getHeaders(),
+                body: JSON.stringify(data)
+            });
+            return await api.handleResponse(res);
+        } catch (error) {
+            console.error('API PUT Error:', error);
+            throw error;
+        }
+    },
+
+    delete: async (endpoint) => {
+        try {
+            const res = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
+                method: 'DELETE',
+                headers: api.getHeaders()
+            });
+            return await api.handleResponse(res);
+        } catch (error) {
+            console.error('API DELETE Error:', error);
+            throw error;
+        }
     }
 };

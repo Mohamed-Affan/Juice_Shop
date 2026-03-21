@@ -1,16 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS - COME BRO CHILL BRO</title>
+    <title>POS - MY BRO SWEET BRO</title>
     <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .pos-container {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 30px;
+            height: calc(100vh - 80px);
+            /* 100vh minus navbar */
+            padding: 30px;
+        }
+
+        /* Menu Panel */
+        .menu-panel {
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .menu-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-item:hover {
+            border-color: var(--accent-secondary);
+            box-shadow: var(--glow-secondary);
+            transform: translateY(-5px);
+        }
+
+        .menu-img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            background-color: #eee;
+            /* Light placeholder */
+        }
+
+        .menu-details {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-grow: 1;
+        }
+
+        .menu-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .menu-price {
+            color: var(--accent-primary);
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        /* Cart Panel */
+        .cart-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .cart-header {
+            padding: 25px;
+            border-bottom: 2px solid var(--bg-main);
+            background: #FFFBF0;
+            display: flex;
+            gap: 15px;
+        }
+
+        .cart-items {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cart-item-info {
+            flex-grow: 1;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            display: block;
+        }
+
+        .cart-item-price {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qty-btn {
+            background: var(--border);
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qty-btn:hover {
+            background: var(--text-muted);
+        }
+
+        .qty-val {
+            font-weight: bold;
+            width: 20px;
+            text-align: center;
+        }
+
+        .cart-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            background: rgba(255, 140, 0, 0.05);
+        }
+
+        .cart-total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+        }
+
+        /* Printable area */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #printable-bill,
+            #printable-bill * {
+                visibility: visible;
+            }
+
+            #printable-bill {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                color: black;
+                background: white;
+                padding: 20px;
+            }
+        }
+
+        #printable-bill {
+            display: none;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Point of Sale</h1>
-    <div id="pos-content"></div>
-    <script src="../js/config.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/pos.js"></script>
+
+    <nav class="navbar">
+        <div class="brand">MY BRO<span> SWEET BRO</span> | POS</div>
+        <div class="nav-actions">
+            <span id="user-display" class="text-muted"></span>
+            <button id="logout-btn" class="btn btn-danger">Logout</button>
+        </div>
+    </nav>
+
+    <div class="pos-container">
+        <!-- Menu Panel -->
+        <div class="menu-panel">
+            <div class="menu-grid" id="menu-grid">
+                <!-- Menu items injected via JS -->
+                <div class="text-center text-muted" style="grid-column: 1 / -1;">Loading menu...</div>
+            </div>
+        </div>
+
+        <!-- Cart Panel -->
+        <div class="cart-panel">
+            <div class="cart-header">
+                <input type="number" id="table-number" class="form-control" placeholder="Table No." min="1" required style="flex:1;">
+                <select id="order-type" class="form-control" style="flex:1;">
+                    <option value="dine-in">Dine In</option>
+                    <option value="takeaway">Takeaway</option>
+                </select>
+            </div>
+            
+            <div class="cart-items" id="cart-items">
+                <!-- Cart items injected via JS -->
+                <div class="text-center text-muted" id="empty-cart-msg">Cart is empty</div>
+            </div>
+
+            <div class="cart-footer">
+                <div class="cart-total-row">
+                    <span>Total:</span>
+                    <span id="cart-total">₹0</span>
+                </div>
+                <button id="btn-place-order" class="btn btn-primary btn-checkout">Place Order & Print</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Printable Bill -->
+    <div id="printable-bill">
+        <h2 style="text-align:center; color: #000;">MY BRO SWEET BRO</h2>
+        <p style="text-align:center; font-size:12px;">Fresh Juice & Snacks</p>
+        <hr>
+        <p><strong>Table:</strong> <span id="bill-table"></span></p>
+        <p><strong>Type:</strong> <span id="bill-type"></span></p>
+        <p><strong>Date:</strong> <span id="bill-date"></span></p>
+        <hr>
+        <table style="width:100%; text-align:left;" id="bill-items">
+            <!-- Items injected -->
+        </table>
+        <hr>
+        <h3 style="text-align:right;">Total: ₹<span id="bill-total"></span></h3>
+        <p style="text-align:center; font-size:12px; margin-top:20px;">Thank You! Visit Again!</p>
+    </div>
+
+            <script src="../js/config.js"></script>
+            <script src="../js/api.js"></script>
+            <script src="../js/auth.js"></script>
+            <script src="../js/pos.js"></script>
 </body>
+
 </html>

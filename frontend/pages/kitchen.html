@@ -3,14 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kitchen - COME BRO CHILL BRO</title>
+    <title>Kitchen Display - MY BRO SWEET BRO</title>
     <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .kds-container { padding: 30px; }
+        .order-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+
+        .order-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        /* Order status styles - Clean light mode colors */
+        .order-card.status-yellow { border-color: var(--warning); border-width: 2px; }
+        .order-card.status-red { border-color: var(--danger); border-width: 2px; }
+
+        .order-header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+        }
+        .order-table {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .order-type {
+            font-size: 0.85rem; font-weight: 600; text-transform: uppercase;
+            padding: 4px 10px; background: white; border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text-muted);
+        }
+        
+        .order-timer {
+            font-size: 1.2rem; font-weight: 800; font-family: monospace;
+            text-align: center; padding: 12px; background: #f1f5f9; color: var(--text-main);
+        }
+
+        .order-items { flex-grow: 1; padding: 20px; list-style: none; }
+        .order-items li {
+            padding: 10px 0; border-bottom: 1px solid #f1f5f9;
+            display: flex; justify-content: space-between; font-size: 1.1rem;
+        }
+        .order-items li:last-child { border-bottom: none; }
+
+        .order-footer { padding: 20px; background: #f8fafc; border-top: 1px solid var(--border); }
+        
+        .btn-complete {
+            width: 100%; padding: 14px; font-size: 1.1rem;
+            background: var(--accent-primary); color: white;
+            border: none; border-radius: 8px; cursor: pointer;
+            font-weight: bold; transition: var(--transition);
+        }
+        .btn-complete:hover {
+            background: var(--accent-hover); transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+        }
+
+        .order-card.status-yellow .order-table { color: var(--warning); }
+        .order-card.status-red .order-table { color: var(--danger); }
+        .order-card.status-yellow .order-timer { color: var(--warning); }
+        .order-card.status-red .order-timer { color: var(--danger); }
+    </style>
 </head>
 <body>
-    <h1>Kitchen Display</h1>
-    <div id="kitchen-orders"></div>
+
+    <nav class="navbar">
+        <div class="brand">MY BRO<span> SWEET BRO</span> | Kitchen Display</div>
+        <div class="nav-actions">
+            <span id="user-display" class="text-muted"></span>
+            <button id="logout-btn" class="btn btn-danger">Logout</button>
+        </div>
+    </nav>
+
+    <div class="kds-container">
+        <div class="order-grid" id="order-grid">
+            <!-- Order cards injected via JS -->
+            <div class="text-center text-muted" style="grid-column: 1 / -1; margin-top: 50px; font-size: 1.2rem;">
+                No pending orders. Kitchen is empty! 🎉
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Sound -->
+    <audio id="alert-sound" src="../assets/sounds/alert.mp3" preload="auto"></audio>
+
     <script src="../js/config.js"></script>
     <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
     <script src="../js/kitchen.js"></script>
 </body>
 </html>
