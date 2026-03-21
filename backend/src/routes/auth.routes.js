@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const { login } = require('../controllers/auth.controller');
+const { loginRules, validate } = require('../middleware/validator');
 
-router.post('/login', (req, res) => {
-    res.json({ message: 'Login route' });
-});
+// POST /api/auth/login
+router.post('/login', loginRules, validate, login);
 
 module.exports = router;
