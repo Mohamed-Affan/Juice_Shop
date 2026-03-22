@@ -1,94 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kitchen Display - MY BRO SWEET BRO</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <title>Kitchen Display - Vibes & Juice</title>
+    <link rel="stylesheet" href="/frontend/css/style.css">
     <style>
-        .kds-container { padding: 30px; }
-        .order-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+        .kds-container {
+            padding: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .order-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 30px;
+        }
 
         .order-card {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: var(--card-shadow);
-            transition: var(--transition);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: fadeIn 0.4s ease;
+            position: relative;
         }
 
-        /* Order status styles - Clean light mode colors */
-        .order-card.status-yellow { border-color: var(--warning); border-width: 2px; }
-        .order-card.status-red { border-color: var(--danger); border-width: 2px; }
+        /* Order status styles - Vibrant Glows */
+        .order-card.status-yellow {
+            border-color: var(--warning);
+            box-shadow: 0 10px 30px rgba(245, 158, 11, 0.25), 0 0 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .order-card.status-red {
+            border-color: var(--danger);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3), 0 0 20px rgba(239, 68, 68, 0.5);
+            animation: pulse-danger 2s infinite;
+        }
+
+        @keyframes pulse-danger {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
 
         .order-header {
-            padding: 15px 20px;
+            padding: 20px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #f8fafc;
-            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.05);
         }
+
+        .order-card.status-yellow .order-header {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), transparent);
+        }
+
+        .order-card.status-red .order-header {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), transparent);
+        }
+
         .order-table {
-            font-size: 1.8rem;
+            font-size: 2.2rem;
             font-weight: 800;
-            color: var(--primary);
+            color: var(--success);
+            line-height: 1;
         }
+
+        .order-card.status-yellow .order-table {
+            color: var(--warning);
+        }
+
+        .order-card.status-red .order-table {
+            color: var(--danger);
+        }
+
         .order-type {
-            font-size: 0.85rem; font-weight: 600; text-transform: uppercase;
-            padding: 4px 10px; background: white; border: 1px solid var(--border);
-            border-radius: 6px; color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            color: var(--text-main);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
-        
+
         .order-timer {
-            font-size: 1.2rem; font-weight: 800; font-family: monospace;
-            text-align: center; padding: 12px; background: #f1f5f9; color: var(--text-main);
+            font-size: 1.4rem;
+            font-weight: 800;
+            font-family: monospace;
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.02);
+            color: var(--success);
+            letter-spacing: 2px;
         }
 
-        .order-items { flex-grow: 1; padding: 20px; list-style: none; }
+        .order-card.status-yellow .order-timer {
+            color: var(--warning);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .order-card.status-red .order-timer {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .order-items {
+            flex-grow: 1;
+            padding: 25px;
+            list-style: none;
+        }
+
         .order-items li {
-            padding: 10px 0; border-bottom: 1px solid #f1f5f9;
-            display: flex; justify-content: space-between; font-size: 1.1rem;
+            padding: 12px 0;
+            border-bottom: 2px dashed rgba(0, 0, 0, 0.06);
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-main);
         }
-        .order-items li:last-child { border-bottom: none; }
 
-        .order-footer { padding: 20px; background: #f8fafc; border-top: 1px solid var(--border); }
-        
+        .order-items li:last-child {
+            border-bottom: none;
+        }
+
+        .order-footer {
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.02);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
         .btn-complete {
-            width: 100%; padding: 14px; font-size: 1.1rem;
-            background: var(--accent-primary); color: white;
-            border: none; border-radius: 8px; cursor: pointer;
-            font-weight: bold; transition: var(--transition);
-        }
-        .btn-complete:hover {
-            background: var(--accent-hover); transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+            width: 100%;
+            padding: 16px;
+            font-size: 1.2rem;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 800;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
         }
 
-        .order-card.status-yellow .order-table { color: var(--warning); }
-        .order-card.status-red .order-table { color: var(--danger); }
-        .order-card.status-yellow .order-timer { color: var(--warning); }
-        .order-card.status-red .order-timer { color: var(--danger); }
+        .btn-complete:hover {
+            background: #0ea5e9;
+            /* Light blue on hover for satisfying finish */
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.5);
+        }
+
+        /* Ambient Blobs */
+        .ambient-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            opacity: 0.4;
+            animation: pulse 12s infinite alternate;
+        }
+
+        .blob-bg {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 80vh;
+            background: var(--success);
+        }
     </style>
 </head>
+
 <body>
 
-    <nav class="navbar">
-        <div class="brand">MY BRO<span> SWEET BRO</span> | Kitchen Display</div>
+    <nav class="navbar animate-fade-in">
+        <div class="brand">COME BRO<br><span class="vibrant-text" style="font-size: 1rem;">CHILL BRO | Kitchen</span>
+        </div>
         <div class="nav-actions">
-            <span id="user-display" class="text-muted"></span>
+            <span id="user-display" class="text-muted" style="font-weight: 600;"></span>
             <button id="logout-btn" class="btn btn-danger">Logout</button>
         </div>
     </nav>
 
-    <div class="kds-container">
+    <div class="ambient-blob blob-bg"></div>
+
+    <div class="kds-container animate-slide-up">
         <div class="order-grid" id="order-grid">
             <!-- Order cards injected via JS -->
-            <div class="text-center text-muted" style="grid-column: 1 / -1; margin-top: 50px; font-size: 1.2rem;">
-                No pending orders. Kitchen is empty! 🎉
+            <div class="text-center text-main"
+                style="grid-column: 1 / -1; margin-top: 80px; font-size: 2rem; font-weight: 800; text-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                No pending orders.<br><span
+                    style="color: var(--text-muted); font-size: 1.2rem; font-weight: 500;">Kitchen is empty! 🎉</span>
             </div>
         </div>
     </div>
@@ -96,9 +220,10 @@
     <!-- Alert Sound -->
     <audio id="alert-sound" src="../assets/sounds/alert.mp3" preload="auto"></audio>
 
-    <script src="../js/config.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/auth.js"></script>
-    <script src="../js/kitchen.js"></script>
+    <script src="/frontend/js/config.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/auth.js"></script>
+    <script src="/frontend/js/kitchen.js"></script>
 </body>
+
 </html>

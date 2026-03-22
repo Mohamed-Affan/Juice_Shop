@@ -13,18 +13,8 @@ const api = {
 
     handleResponse: async (res) => {
         if (!res.ok) {
-            if (res.status === 401 || res.status === 403) {
-                // Unauthorized, clear token and redirect to login
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = 'login.html';
-                throw new Error('Unauthorized');
-            }
-            if(res.status === 429) {
-                throw new Error('Too many requests. Please try again later.');
-            }
             const data = await res.json().catch(() => ({}));
-            throw new Error(data.message || data.error || 'Something went wrong. Please try again.');
+            throw new Error(data.message || "Server not reachable");
         }
         return res.json();
     },

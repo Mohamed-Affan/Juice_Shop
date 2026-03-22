@@ -8,7 +8,7 @@ Type: Real-world POS + Kitchen System
 
 1. OVERVIEW
 
-COME BRO CHILL BRO is a production-grade web-based system designed for a real juice shop.
+MY BRO SWEET  BRO is a production-grade web-based system designed for a real juice shop.
 
 It provides:
 

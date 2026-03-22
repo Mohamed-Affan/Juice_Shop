@@ -50,11 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function redirectBasedOnRole(role) {
     if (role === 'admin') {
-        window.location.href = 'admin.html';
+        window.location.href = '/frontend/pages/admin.html';
     } else if (role === 'pos') {
-        window.location.href = 'pos.html';
+        window.location.href = '/frontend/pages/pos.html';
     } else if (role === 'kitchen') {
-        window.location.href = 'kitchen.html';
+        window.location.href = '/frontend/pages/kitchen.html';
     } else {
         showToast('Unknown user role', 'error');
     }
@@ -66,7 +66,7 @@ function enforceLogin(allowedRoles = []) {
     const user = JSON.parse(localStorage.getItem('user'));
 
     if (!token || !user) {
-        window.location.href = 'login.html';
+        window.location.href = '/frontend/pages/login.html';
         return null;
     }
 
@@ -92,7 +92,7 @@ function setupLogout() {
         logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = 'login.html';
+            window.location.href = '/frontend/pages/login.html';
         });
     }
 }

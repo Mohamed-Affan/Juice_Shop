@@ -1,11 +1,5 @@
 const CONFIG = {
-    // Determine API URL based on environment (local dev vs production build)
-    API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-        ? 'http://localhost:3000/api'
-        : '/api', // Relative path for production if served together
-    
-    // Optional: add supabase config if frontend directly hits supabase
-    // For now, prd implies frontend -> Node.js Backend -> Supabase
+    API_BASE_URL: "http://localhost:5000/api"
 };
 
 // Simple notification UI component

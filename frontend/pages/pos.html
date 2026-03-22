@@ -1,93 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS - MY BRO SWEET BRO</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <title>POS - Vibes & Juice</title>
+    <link rel="stylesheet" href="/frontend/css/style.css">
     <style>
         .pos-container {
             display: grid;
             grid-template-columns: 1fr 420px;
             gap: 30px;
             height: calc(100vh - 80px);
-            /* 100vh minus navbar */
             padding: 30px;
+            position: relative;
+            z-index: 10;
         }
 
         /* Menu Panel */
         .menu-panel {
             overflow-y: auto;
-            padding-right: 10px;
+            padding-right: 15px;
         }
+        
+        /* Custom scrollbar for webkit */
+        .menu-panel::-webkit-scrollbar { width: 8px; }
+        .menu-panel::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .menu-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 4px; }
 
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
         }
 
         .menu-item {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
             overflow: hidden;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s var(--transition);
             text-align: center;
             display: flex;
             flex-direction: column;
+            box-shadow: var(--glass-shadow);
         }
 
         .menu-item:hover {
-            border-color: var(--accent-secondary);
-            box-shadow: var(--glow-secondary);
-            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 15px 35px rgba(255, 51, 102, 0.2);
+            transform: translateY(-8px) scale(1.02);
         }
 
         .menu-img {
             width: 100%;
-            height: 140px;
+            height: 160px;
             object-fit: cover;
-            background-color: #eee;
-            /* Light placeholder */
+            background-color: rgba(255,255,255,0.5);
+            transition: transform 0.5s ease;
+        }
+        
+        .menu-item:hover .menu-img {
+            transform: scale(1.05);
         }
 
         .menu-details {
-            padding: 15px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             flex-grow: 1;
+            background: rgba(255,255,255,0.6);
         }
 
         .menu-name {
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 5px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
         }
 
         .menu-price {
-            color: var(--accent-primary);
+            color: var(--primary);
             font-weight: 800;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            text-shadow: 0 2px 5px rgba(255, 51, 102, 0.2);
         }
 
         /* Cart Panel */
         .cart-panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            animation: fadeIn 0.8s ease forwards;
         }
 
         .cart-header {
             padding: 25px;
-            border-bottom: 2px solid var(--bg-main);
-            background: #FFFBF0;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.9);
+            background: rgba(255,255,255,0.5);
             display: flex;
             gap: 15px;
         }
@@ -97,13 +116,28 @@
             overflow-y: auto;
             padding: 20px;
         }
+        
+        .cart-items::-webkit-scrollbar { width: 6px; }
+        .cart-items::-webkit-scrollbar-track { background: transparent; }
+        .cart-items::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
 
         .cart-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
+            padding: 15px;
+            background: rgba(255,255,255,0.6);
+            border-radius: var(--radius-md);
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            transition: all 0.3s ease;
+        }
+        
+        .cart-item:hover {
+            background: white;
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
         .cart-item-info {
@@ -111,109 +145,133 @@
         }
 
         .cart-item-name {
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.05rem;
             display: block;
+            color: var(--text-main);
         }
 
         .cart-item-price {
-            color: var(--text-muted);
-            font-size: 0.9rem;
+            color: var(--secondary);
+            font-size: 0.95rem;
+            font-weight: 600;
         }
 
         .qty-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            background: rgba(255,255,255,0.8);
+            padding: 5px;
+            border-radius: 20px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .qty-btn {
-            background: var(--border);
-            color: white;
+            background: white;
+            color: var(--text-main);
             border: none;
-            width: 25px;
-            height: 25px;
-            border-radius: 4px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s;
         }
 
         .qty-btn:hover {
-            background: var(--text-muted);
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
         }
 
         .qty-val {
-            font-weight: bold;
+            font-weight: 800;
             width: 20px;
             text-align: center;
         }
 
         .cart-footer {
-            padding: 20px;
-            border-top: 1px solid var(--border);
-            background: rgba(255, 140, 0, 0.05);
+            padding: 25px;
+            border-top: 1px solid rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.7);
         }
 
         .cart-total-row {
             display: flex;
             justify-content: space-between;
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             font-weight: 800;
-            margin-bottom: 20px;
-            color: var(--primary);
+            margin-bottom: 25px;
+            color: var(--text-main);
+        }
+        
+        .cart-total-row span:last-child {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .btn-checkout {
             width: 100%;
-            padding: 15px;
-            font-size: 1.2rem;
+            padding: 16px;
+            font-size: 1.25rem;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 20px rgba(255, 51, 102, 0.3);
         }
 
         /* Printable area */
         @media print {
-            body * {
-                visibility: hidden;
-            }
-
-            #printable-bill,
-            #printable-bill * {
-                visibility: visible;
-            }
-
+            body * { visibility: hidden; }
+            #printable-bill, #printable-bill * { visibility: visible; }
             #printable-bill {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                color: black;
-                background: white;
-                padding: 20px;
+                position: absolute; left: 0; top: 0; width: 100%; color: black; background: white; padding: 20px;
             }
         }
-
-        #printable-bill {
-            display: none;
+        #printable-bill { display: none; }
+        
+        /* Ambient Blobs */
+        .ambient-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+            opacity: 0.6;
+            animation: pulse 8s infinite alternate;
+        }
+        .blob-tr { top: -100px; right: -50px; width: 400px; height: 400px; background: var(--warning); }
+        .blob-bl { bottom: -100px; left: -100px; width: 500px; height: 500px; background: var(--secondary); animation-delay: -4s; }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.2); opacity: 0.8; }
         }
     </style>
 </head>
-
 <body>
 
-    <nav class="navbar">
-        <div class="brand">MY BRO<span> SWEET BRO</span> | POS</div>
+    <nav class="navbar animate-fade-in">
+        <div class="brand">COME BRO<br><span class="vibrant-text" style="font-size: 1rem;">CHILL BRO | POS</span></div>
         <div class="nav-actions">
-            <span id="user-display" class="text-muted"></span>
+            <span id="user-display" class="text-muted" style="font-weight: 600;"></span>
             <button id="logout-btn" class="btn btn-danger">Logout</button>
         </div>
     </nav>
+    
+    <div class="ambient-blob blob-tr"></div>
+    <div class="ambient-blob blob-bl"></div>
 
-    <div class="pos-container">
+    <div class="pos-container animate-slide-up">
         <!-- Menu Panel -->
         <div class="menu-panel">
             <div class="menu-grid" id="menu-grid">
                 <!-- Menu items injected via JS -->
-                <div class="text-center text-muted" style="grid-column: 1 / -1;">Loading menu...</div>
+                <div class="text-center text-light" style="grid-column: 1 / -1; font-size: 1.2rem; font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Loading menu...</div>
             </div>
         </div>
 
@@ -229,7 +287,7 @@
             
             <div class="cart-items" id="cart-items">
                 <!-- Cart items injected via JS -->
-                <div class="text-center text-muted" id="empty-cart-msg">Cart is empty</div>
+                <div class="text-center text-muted" id="empty-cart-msg" style="font-weight: 500; padding-top: 2rem;">Cart is empty ✨</div>
             </div>
 
             <div class="cart-footer">
@@ -259,10 +317,9 @@
         <p style="text-align:center; font-size:12px; margin-top:20px;">Thank You! Visit Again!</p>
     </div>
 
-            <script src="../js/config.js"></script>
-            <script src="../js/api.js"></script>
-            <script src="../js/auth.js"></script>
-            <script src="../js/pos.js"></script>
+    <script src="/frontend/js/config.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/auth.js"></script>
+    <script src="/frontend/js/pos.js"></script>
 </body>
-
 </html>
