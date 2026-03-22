@@ -1,7 +1,7 @@
 const supabase = require('../services/supabase');
 
-// GET /api/orders/pending — fetch pending/preparing orders with items
-const getPending = async (req, res) => {
+// GET /api/orders/active — fetch pending/preparing orders with items
+const getActive = async (req, res) => {
     try {
         // Fetch orders that are pending or preparing
         const { data: orders, error: ordersError } = await supabase
@@ -23,7 +23,7 @@ const getPending = async (req, res) => {
         const orderIds = orders.map(o => o.id);
         const { data: orderItems, error: itemsError } = await supabase
             .from('order_items')
-            .select('*, menu(name)')
+            .select('*, menu_items(name)')
             .in('order_id', orderIds);
 
         if (itemsError) {
@@ -37,14 +37,14 @@ const getPending = async (req, res) => {
             items: (orderItems || [])
                 .filter(item => item.order_id === order.id)
                 .map(item => ({
-                    name: item.menu ? item.menu.name : 'Unknown Item',
+                    name: item.menu_items ? item.menu_items.name : 'Unknown Item',
                     quantity: item.quantity,
                 })),
         }));
 
         res.json(result);
     } catch (err) {
-        console.error('getPending error:', err);
+        console.error('getActive error:', err);
         res.status(500).json({ message: 'Something went wrong. Please try again.' });
     }
 };
@@ -81,7 +81,7 @@ const create = async (req, res) => {
         // Fetch menu prices to calculate total
         const menuIds = items.map(i => i.menu_id);
         const { data: menuItems, error: menuError } = await supabase
-            .from('menu')
+            .from('menu_items')
             .select('id, price')
             .in('id', menuIds);
 
@@ -106,7 +106,7 @@ const create = async (req, res) => {
             .from('orders')
             .insert([{
                 table_number,
-                order_type: order_type || 'dine-in',
+                type: order_type || 'dine-in',
                 status: 'pending',
                 total_amount: totalAmount,
             }])
@@ -169,4 +169,4 @@ const complete = async (req, res) => {
     }
 };
 
-module.exports = { getPending, getCompleted, create, complete };
+module.exports = { getActive, getCompleted, create, complete };

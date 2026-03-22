@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { orderRules, validate } = require('../middleware/validator');
-const { getPending, getCompleted, create, complete } = require('../controllers/order.controller');
+const { getActive, getCompleted, create, complete } = require('../controllers/order.controller');
 
-// GET /api/orders/pending — kitchen and admin
-router.get('/pending', authenticate, authorize('kitchen', 'admin'), getPending);
+// GET /api/orders/active — kitchen and admin
+router.get('/active', authenticate, authorize('kitchen', 'admin'), getActive);
 
 // GET /api/orders/completed — admin only
 router.get('/completed', authenticate, authorize('admin'), getCompleted);

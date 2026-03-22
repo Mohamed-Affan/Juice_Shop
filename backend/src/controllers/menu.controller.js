@@ -4,9 +4,9 @@ const supabase = require('../services/supabase');
 const getAll = async (req, res) => {
     try {
         const { data, error } = await supabase
-            .from('menu')
+            .from('menu_items')
             .select('*')
-            .order('created_at', { ascending: true });
+            .order('id', { ascending: true });
 
         if (error) {
             console.error('Menu fetch error:', error);
@@ -26,7 +26,7 @@ const create = async (req, res) => {
         const { name, price, image_url } = req.body;
 
         const { data, error } = await supabase
-            .from('menu')
+            .from('menu_items')
             .insert([{ name: name.trim(), price, image_url: image_url || null }])
             .select();
 
@@ -49,7 +49,7 @@ const update = async (req, res) => {
         const { name, price, image_url } = req.body;
 
         const { data, error } = await supabase
-            .from('menu')
+            .from('menu_items')
             .update({ name: name.trim(), price, image_url: image_url || null })
             .eq('id', id)
             .select();
@@ -76,7 +76,7 @@ const remove = async (req, res) => {
         const { id } = req.params;
 
         const { error } = await supabase
-            .from('menu')
+            .from('menu_items')
             .delete()
             .eq('id', id);
 
