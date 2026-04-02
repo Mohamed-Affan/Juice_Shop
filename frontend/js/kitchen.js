@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function fetchOrders() {
     try {
-        const newOrders = await api.get('/orders/pending');
+        const newOrders = await api.get('/orders/active');
 
         // Check if new orders arrived (play sound)
         if (orders.length > 0 && newOrders.length > orders.length) {
@@ -63,7 +63,7 @@ function renderOrders() {
         card.innerHTML = `
             <div class="order-header">
                 <div class="order-table">Table ${order.table_number}</div>
-                <div class="order-type">${order.order_type || 'dine-in'}</div>
+                <div class="order-type">${order.type || order.order_type || 'dine-in'}</div>
             </div>
             <div class="order-timer" id="timer-${order.id}">00:00</div>
             <ul class="order-items">

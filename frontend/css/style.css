@@ -203,3 +203,98 @@ body {
 .ambient-blob {
     display: none !important; /* Forces hiding of the vibrant aesthetic blobs */
 }
+
+/* Drop Zone Styles for Image Uploads */
+.drop-zone {
+    max-width: 100%;
+    height: 120px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.drop-zone--over {
+    border-color: var(--primary);
+    background: rgba(249, 115, 22, 0.05);
+}
+
+.drop-zone__input {
+    display: none;
+}
+/* Modal Base Styles */
+.modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(15, 23, 42, 0.75) !important;
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+}
+
+.modal.active {
+    display: flex !important;
+}
+
+.modal-content {
+    background: white !important;
+    padding: 35px !important;
+    border-radius: var(--radius-lg) !important;
+    width: 100% !important;
+    max-width: 460px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    position: relative !important;
+    color: var(--text-main) !important;
+}
+
+.modal-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 25px !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding-bottom: 15px !important;
+}
+
+.modal-header h2 {
+    margin: 0 !important;
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    color: var(--text-main) !important;
+    background: none !important;
+    -webkit-text-fill-color: initial !important;
+}
+
+.close-btn {
+    background: #f1f5f9 !important;
+    border: none !important;
+    font-size: 1.4rem !important;
+    cursor: pointer !important;
+    color: var(--text-muted) !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: var(--transition) !important;
+}
+.close-btn:hover {
+    background: #e2e8f0 !important;
+    color: var(--danger) !important;
+}

@@ -51,9 +51,18 @@ const orderRules = [
         .isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
 ];
 
+const changePasswordRules = [
+    body('currentPassword')
+        .notEmpty().withMessage('Current password is required'),
+    body('newPassword')
+        .notEmpty().withMessage('New password is required')
+        .isLength({ min: 1, max: 100 }).withMessage('New password must be at least 1 characters'),
+];
+
 module.exports = {
     validate,
     loginRules,
     menuRules,
     orderRules,
+    changePasswordRules,
 };

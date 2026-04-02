@@ -133,7 +133,7 @@ async function placeOrder() {
         btn.disabled = true;
         btn.textContent = 'Processing...';
 
-        await api.post('/orders', {
+        const order = await api.post('/orders', {
             table_number: tableNumber,
             order_type: orderType,
             items: orderItems,
@@ -141,8 +141,8 @@ async function placeOrder() {
 
         showToast('Order Placed Successfully!');
         
-        // Print Bill
-        printBill(tableNumber, orderType);
+        // Print Bill with order details
+        printBill(tableNumber, orderType, order);
 
         // Reset POS
         cart = {};
@@ -158,36 +158,54 @@ async function placeOrder() {
     }
 }
 
-function printBill(table, type) {
+function printBill(table, type, order) {
     document.getElementById('bill-table').textContent = table;
     document.getElementById('bill-type').textContent = type.toUpperCase();
-    document.getElementById('bill-date').textContent = new Date().toLocaleString();
+    document.getElementById('bill-date').textContent = new Date().toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' });
     
-    const tbody = document.getElementById('bill-items');
-    tbody.innerHTML = `
-        <tr>
-            <th style="border-bottom:1px solid #ccc">Item</th>
-            <th style="border-bottom:1px solid #ccc; text-align:right">Qty</th>
-            <th style="border-bottom:1px solid #ccc; text-align:right">Amt</th>
-        </tr>
-    `;
+    // Show Order Ref No
+    if (order && order.id) {
+        const idStr = String(order.id);
+        document.getElementById('bill-no-print').textContent = `ORD-${idStr.slice(0, 8).toUpperCase()}`;
+    }
+    
+    // Fill bill items
+    const tbody = document.getElementById('bill-items-body');
+    tbody.innerHTML = '';
     
     let total = 0;
     Object.keys(cart).forEach(id => {
         const item = cart[id];
         const amt = item.product.price * item.quantity;
         total += amt;
-        tbody.innerHTML += `
-            <tr>
-                <td>${item.product.name}</td>
-                <td style="text-align:right">${item.quantity}</td>
-                <td style="text-align:right">${amt}</td>
-            </tr>
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="padding: 6px 0; border-bottom: 1px dashed #eee;">${item.product.name}</td>
+            <td style="padding: 6px 0; border-bottom: 1px dashed #eee; text-align:right">${item.quantity}</td>
+            <td style="padding: 6px 0; border-bottom: 1px dashed #eee; text-align:right">₹${amt}</td>
         `;
+        tbody.appendChild(tr);
     });
 
     document.getElementById('bill-total').textContent = total;
 
+    // Generate QR for payment
+    const upiID   = 'nithyamudliar@okksbi';
+    const upiName = 'MyBroSweetBro';
+    const upiString = `upi://pay?pa=${upiID}&pn=${encodeURIComponent(upiName)}&am=${total}&cu=INR`;
+    
+    document.getElementById('bill-qr-code').innerHTML = '';
+    new QRCode(document.getElementById('bill-qr-code'), {
+        text: upiString,
+        width: 120,
+        height: 120,
+        colorDark: "#000000",
+        colorLight: "#ffffff"
+    });
+
     // Trigger browser print
-    window.print();
+    setTimeout(() => {
+        window.print();
+    }, 300);
 }

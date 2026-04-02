@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing - MY BRO SWEET BRO</title>
+    <link rel="stylesheet" href="/frontend/css/style.css">
+    <!-- QRCode.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        /* ── Page Layout ── */
+        .billing-wrapper {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 30px 20px 60px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .page-header .back-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 8px 14px;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .page-header .back-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+        .page-header h1 span { color: var(--primary); }
+
+        /* ── Search Bar ── */
+        .search-card {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 28px;
+        }
+        .search-card input {
+            flex: 1;
+            font-size: 1.05rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .search-card input::placeholder { text-transform: none; letter-spacing: 0; }
+        .search-card .btn { min-width: 120px; }
+
+        /* ── Bill Card ── */
+        #bill-section { display: none; animation: slideUp 0.4s ease; }
+
+        .bill-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--glass-shadow);
+            overflow: hidden;
+        }
+
+        .bill-card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #fb923c 100%);
+            padding: 28px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            color: white;
+        }
+        .bill-card-header .shop-name {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .bill-card-header .bill-meta {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+        .bill-no-badge {
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 8px;
+            padding: 6px 16px;
+            letter-spacing: 1px;
+        }
+
+        .bill-card-body { padding: 28px 30px; }
+
+        .bill-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .info-item {
+            background: var(--bg-main);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+        }
+        .info-item .info-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .info-item .info-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .status-badge.paid {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #86efac;
+        }
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fcd34d;
+        }
+        .status-badge::before {
+            content: '';
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Items Table */
+        .items-section { margin-bottom: 24px; }
+        .items-section h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .items-table th {
+            text-align: left;
+            padding: 10px 14px;
+            background: var(--bg-main);
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+        }
+        .items-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 500;
+            color: var(--text-main);
+        }
+        .items-table tr:last-child td { border-bottom: none; }
+        .items-table td.subtotal { font-weight: 700; color: var(--primary); }
+
+        /* Total Row */
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #fff7ed, #fef3c7);
+            border: 1px solid #fed7aa;
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-bottom: 28px;
+        }
+        .total-row .total-label {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .total-row .total-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        /* QR Code Section */
+        .qr-section {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-main);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            padding: 28px;
+            margin-bottom: 24px;
+            animation: fadeIn 0.3s ease;
+        }
+        .qr-section h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            text-align: center;
+        }
+        .qr-section .qr-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        #qr-canvas-wrapper {
+            padding: 12px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .qr-amount-chip {
+            background: var(--primary);
+            color: white;
+            font-weight: 800;
+            font-size: 1.1rem;
+            padding: 6px 20px;
+            border-radius: 999px;
+        }
+
+        /* Payment Action Buttons */
+        .payment-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .payment-actions .btn { flex: 1; min-width: 160px; padding: 14px; font-size: 1rem; }
+        .btn-success {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+        }
+        .btn-success:hover:not(:disabled) {
+            background: var(--secondary-hover);
+            transform: translateY(-1px);
+        }
+        .btn-cash {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+        }
+        .btn-cash:hover:not(:disabled) {
+            background: #d97706;
+            transform: translateY(-1px);
+        }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+        /* Paid overlay */
+        .paid-overlay {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #16a34a;
+        }
+        .paid-overlay.visible { display: flex; }
+        .paid-overlay svg { flex-shrink: 0; }
+
+        /* Recent Bills Table */
+        .recent-section {
+            margin-top: 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--glass-shadow);
+        }
+        .recent-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .recent-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .recent-table th {
+            text-align: left;
+            padding: 12px;
+            background: var(--bg-main);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .recent-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+        .recent-table tr:hover { background: #f8fafc; cursor: pointer; }
+        .recent-table .bill-link { color: var(--primary); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <nav class="navbar animate-fade-in">
+        <div class="brand">MY BRO <span class="vibrant-text">SWEET BRO</span></div>
+        <div class="nav-actions">
+            <span id="user-display" class="text-muted" style="font-weight: 600;"></span>
+            <button id="logout-btn" class="btn btn-danger">Logout</button>
+        </div>
+    </nav>
+
+    <div class="billing-wrapper animate-slide-up">
+        <div class="page-header">
+            <a href="/frontend/pages/admin.html" class="back-btn">← Back</a>
+            <h1>💳 <span>Billing</span> Counter</h1>
+        </div>
+
+        <!-- Search -->
+        <div class="search-card">
+            <input type="text" id="bill-input" class="form-control" placeholder="Enter Bill Number (e.g. BILL-A1B2C3D4)" autocomplete="off">
+            <button class="btn btn-primary" id="search-btn" onclick="searchBill()">🔍 Search</button>
+        </div>
+
+        <!-- Bill Section (hidden until search) -->
+        <div id="bill-section">
+            <div class="bill-card">
+                <!-- Bill Header -->
+                <div class="bill-card-header">
+                    <div>
+                        <div class="shop-name">MY BRO SWEET BRO 🥤</div>
+                        <div class="bill-meta" id="bill-date"></div>
+                    </div>
+                    <div class="bill-no-badge" id="bill-no-display"></div>
+                </div>
+
+                <div class="bill-card-body">
+                    <!-- Info Grid -->
+                    <div class="bill-info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Table</div>
+                            <div class="info-value" id="bill-table">—</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Order Type</div>
+                            <div class="info-value" id="bill-type">—</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Order Status</div>
+                            <div class="info-value" id="bill-order-status">—</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Payment</div>
+                            <div class="info-value" id="bill-payment-badge"></div>
+                        </div>
+                    </div>
+
+                    <!-- Items Table -->
+                    <div class="items-section">
+                        <h3>Order Items</h3>
+                        <table class="items-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bill-items-body"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="total-row">
+                        <div class="total-label">Total Amount</div>
+                        <div class="total-value" id="bill-total">₹0</div>
+                    </div>
+
+                    <!-- Already-paid notice -->
+                    <div class="paid-overlay" id="paid-overlay">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="9 12 11 14 15 10"/>
+                        </svg>
+                        <span id="paid-overlay-text">Payment complete!</span>
+                    </div>
+
+                    <!-- UPI QR -->
+                    <div class="qr-section" id="qr-section">
+                        <h3>Scan to Pay via UPI</h3>
+                        <div id="qr-canvas-wrapper">
+                            <div id="qr-code"></div>
+                        </div>
+                        <div class="qr-amount-chip" id="qr-amount-chip"></div>
+                        <div class="qr-sub">Open GPay / PhonePe / Paytm and scan</div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="payment-actions" id="payment-actions">
+                        <button class="btn btn-primary" id="btn-show-qr" onclick="toggleQR()">📱 Show UPI QR</button>
+                        <button class="btn btn-success" id="btn-upi-paid" onclick="markPaid('upi')">✅ Mark as UPI Paid</button>
+                        <button class="btn btn-cash" id="btn-cash-paid" onclick="markPaid('cash')">💵 Mark as Cash Paid</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Bills Section -->
+        <div class="recent-section" id="recent-section">
+            <h2>📜 Recent Completed Bills</h2>
+            <div style="overflow-x: auto;">
+                <table class="recent-table">
+                    <thead>
+                        <tr>
+                            <th>Bill No</th>
+                            <th>Table</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-bills-body">
+                        <tr><td colspan="5" style="text-align:center; padding: 30px; color: var(--text-muted);">Loading recent bills...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="/frontend/js/config.js"></script>
+    <script src="/frontend/js/api.js"></script>
+    <script src="/frontend/js/auth.js"></script>
+    <script>
+        // ── Config ──────────────────────────────────────────────
+        const UPI_ID   = 'nithyamudliar@okksbi';
+        const UPI_NAME = 'MyBroSweetBro';
+
+        // ── State ────────────────────────────────────────────────
+        let currentBill = null;
+        let qrRendered  = false;
+        let qrVisible   = false;
+
+        // ── Init ─────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = enforceLogin(['admin', 'pos']);
+            if (!user) return;
+
+            document.getElementById('user-display').textContent = user.username;
+
+            // Allow Enter key in search input
+            document.getElementById('bill-input').addEventListener('keydown', e => {
+                if (e.key === 'Enter') searchBill();
+            });
+
+            // Load recent bills
+            loadRecentBills();
+        });
+        
+        async function loadRecentBills() {
+            try {
+                const data = await api.get('/billing/recent');
+                const tbody = document.getElementById('recent-bills-body');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">No bills found yet</td></tr>';
+                    return;
+                }
+
+                data.forEach(b => {
+                    const tr = document.createElement('tr');
+                    tr.onclick = () => {
+                        const searchParam = b.bill_no.startsWith('DRAFT-') ? b.id : b.bill_no;
+                        document.getElementById('bill-input').value = searchParam;
+                        searchBill();
+                    };
+                    tr.innerHTML = `
+                        <td class="bill-link">${b.bill_no}</td>
+                        <td>Table ${b.table_number}</td>
+                        <td>₹${b.final_amount || b.total_amount}</td>
+                        <td><span class="status-badge ${b.payment_status}">${capitalize(b.payment_status)}</span></td>
+                        <td>${new Date(b.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error('Recent bills load fail:', err);
+            }
+        }
+
+        // ── Search Bill ──────────────────────────────────────────
+        async function searchBill() {
+            const rawInput = document.getElementById('bill-input').value.trim();
+            if (!rawInput) { showToast('Please enter a bill number', 'error'); return; }
+
+            const billNo = rawInput.toUpperCase();
+            const btn    = document.getElementById('search-btn');
+            btn.disabled    = true;
+            btn.textContent = 'Searching…';
+
+            // Reset state
+            document.getElementById('bill-section').style.display = 'none';
+            qrRendered = false;
+            qrVisible  = false;
+
+            try {
+                const data = await api.get(`/billing/${encodeURIComponent(billNo)}`);
+                currentBill = data;
+                renderBill(data);
+                document.getElementById('bill-section').style.display = 'block';
+            } catch (err) {
+                showToast(err.message || 'Bill not found', 'error');
+            } finally {
+                btn.disabled    = false;
+                btn.textContent = '🔍 Search';
+            }
+        }
+
+        // ── Render Bill ──────────────────────────────────────────
+        function renderBill(b) {
+            // Header
+            document.getElementById('bill-no-display').textContent = b.bill_no;
+            document.getElementById('bill-date').textContent =
+                new Date(b.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+
+            // Info grid
+            document.getElementById('bill-table').textContent  = `Table ${b.table_number}`;
+            document.getElementById('bill-type').textContent   = capitalize(b.order_type);
+            document.getElementById('bill-order-status').textContent = capitalize(b.status);
+
+            // Payment badge
+            const isPaid = b.payment_status === 'paid';
+            document.getElementById('bill-payment-badge').innerHTML =
+                isPaid
+                    ? '<span class="status-badge paid">Paid</span>'
+                    : '<span class="status-badge pending">Pending</span>';
+
+            // Items table
+            const tbody = document.getElementById('bill-items-body');
+            tbody.innerHTML = '';
+            (b.items || []).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>₹${item.price}</td>
+                    <td>${item.quantity}</td>
+                    <td class="subtotal">₹${item.subtotal}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Total
+            const amount = b.final_amount || b.total_amount || 0;
+            document.getElementById('bill-total').textContent = `₹${amount}`;
+
+            // QR section reset
+            document.getElementById('qr-section').style.display = 'none';
+            document.getElementById('qr-code').innerHTML = '';
+            document.getElementById('qr-amount-chip').textContent = `₹${amount}`;
+
+            // Payment state
+            if (isPaid) {
+                const method = b.payment_method ? ` via ${b.payment_method.toUpperCase()}` : '';
+                const paidAt = b.paid_at
+                    ? ' on ' + new Date(b.paid_at).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })
+                    : '';
+                document.getElementById('paid-overlay-text').textContent =
+                    `Payment received${method}${paidAt}`;
+                document.getElementById('paid-overlay').classList.add('visible');
+                disablePaymentButtons();
+            } else {
+                document.getElementById('paid-overlay').classList.remove('visible');
+                enablePaymentButtons();
+            }
+        }
+
+        // ── QR Code ──────────────────────────────────────────────
+        function toggleQR() {
+            if (!currentBill) return;
+
+            const qrSection = document.getElementById('qr-section');
+            qrVisible = !qrVisible;
+            qrSection.style.display = qrVisible ? 'flex' : 'none';
+            document.getElementById('btn-show-qr').textContent =
+                qrVisible ? '🙈 Hide QR' : '📱 Show UPI QR';
+
+            if (qrVisible && !qrRendered) {
+                // Small delay to ensure flex container is painted
+                setTimeout(() => {
+                    const amount    = currentBill.final_amount || currentBill.total_amount || 0;
+                    const upiString = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount}&cu=INR`;
+                    
+                    console.log('Generating QR for:', upiString);
+                    document.getElementById('qr-code').innerHTML = '';
+                    
+                    try {
+                        new QRCode(document.getElementById('qr-code'), {
+                            text: upiString,
+                            width: 200,
+                            height: 200,
+                            colorDark: '#0f172a',
+                            colorLight: '#ffffff',
+                            correctLevel: QRCode.CorrectLevel.M
+                        });
+                        qrRendered = true;
+                    } catch (err) {
+                        console.error('QR Generation failed:', err);
+                        showToast('Failed to generate QR code', 'error');
+                    }
+                }, 100);
+            }
+        }
+
+        // ── Mark Paid ─────────────────────────────────────────────
+        async function markPaid(method) {
+            if (!currentBill) return;
+
+            const btnId  = method === 'upi' ? 'btn-upi-paid' : 'btn-cash-paid';
+            const btn    = document.getElementById(btnId);
+            const orig   = btn.textContent;
+
+            btn.disabled    = true;
+            btn.textContent = 'Processing…';
+
+            try {
+                await api.put(`/billing/${currentBill.id}/pay`, { method });
+                currentBill.payment_status = 'paid';
+                currentBill.payment_method = method;
+                currentBill.paid_at        = new Date().toISOString();
+                showToast(`Payment recorded via ${method.toUpperCase()} ✅`);
+                renderBill(currentBill);
+            } catch (err) {
+                showToast(err.message || 'Payment failed', 'error');
+                btn.disabled    = false;
+                btn.textContent = orig;
+            }
+        }
+
+        // ── Helpers ───────────────────────────────────────────────
+        function disablePaymentButtons() {
+            ['btn-show-qr', 'btn-upi-paid', 'btn-cash-paid'].forEach(id => {
+                document.getElementById(id).disabled = true;
+            });
+        }
+        function enablePaymentButtons() {
+            ['btn-show-qr', 'btn-upi-paid', 'btn-cash-paid'].forEach(id => {
+                document.getElementById(id).disabled = false;
+            });
+        }
+        function capitalize(str) {
+            if (!str) return '—';
+            return str.charAt(0).toUpperCase() + str.slice(1).replace(/-/g, ' ');
+        }
+    </script>
+</body>
+</html>

@@ -21,6 +21,7 @@ app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/menu', require('./routes/menu.routes'));
 app.use('/api/orders', require('./routes/order.routes'));
 app.use('/api/reports', require('./routes/report.routes'));
+app.use('/api/billing', require('./routes/billing.routes'));
 
 // Root
 app.get('/', (req, res) => {

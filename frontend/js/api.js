@@ -70,5 +70,26 @@ const api = {
             console.error('API DELETE Error:', error);
             throw error;
         }
+    },
+
+    upload: async (endpoint, formData) => {
+        try {
+            const token = localStorage.getItem('token');
+            const headers = {};
+            if (token) {
+                headers['Authorization'] = token;
+            }
+            // Note: Don't set Content-Type header for FormData, browser does it automatically with boundary
+
+            const res = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
+                method: 'POST',
+                headers: headers,
+                body: formData
+            });
+            return await api.handleResponse(res);
+        } catch (error) {
+            console.error('API Upload Error:', error);
+            throw error;
+        }
     }
 };

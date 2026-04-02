@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POS - Vibes & Juice</title>
     <link rel="stylesheet" href="/frontend/css/style.css">
+    <!-- QRCode.js for Printed Bill -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         .pos-container {
             display: grid;
@@ -227,11 +229,18 @@
 
         /* Printable area */
         @media print {
-            body * { visibility: hidden; }
-            #printable-bill, #printable-bill * { visibility: visible; }
+            body > *:not(#printable-bill) { display: none !important; }
             #printable-bill {
-                position: absolute; left: 0; top: 0; width: 100%; color: black; background: white; padding: 20px;
+                display: block !important;
+                position: relative;
+                width: 100%;
+                color: black !important;
+                background: white !important;
+                padding: 10mm;
+                font-family: 'Courier New', Courier, monospace; /* Thermal printer vibe */
+                font-size: 14px;
             }
+            @page { margin: 0; }
         }
         #printable-bill { display: none; }
         
@@ -302,19 +311,45 @@
 
     <!-- Hidden Printable Bill -->
     <div id="printable-bill">
-        <h2 style="text-align:center; color: #000;">MY BRO SWEET BRO</h2>
-        <p style="text-align:center; font-size:12px;">Fresh Juice & Snacks</p>
-        <hr>
-        <p><strong>Table:</strong> <span id="bill-table"></span></p>
-        <p><strong>Type:</strong> <span id="bill-type"></span></p>
-        <p><strong>Date:</strong> <span id="bill-date"></span></p>
-        <hr>
-        <table style="width:100%; text-align:left;" id="bill-items">
-            <!-- Items injected -->
+        <h1 style="text-align:center; font-size: 24px; margin-bottom: 5px;">MY BRO SWEET BRO</h1>
+        <p style="text-align:center; margin: 0; font-size: 14px;">🥤 Fresh Juices & More 🥤</p>
+        <p style="text-align:center; margin: 5px 0 15px; font-size: 12px;">Contact: +91 XXXXXXXXXX</p>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span><strong>Bill No:</strong> <span id="bill-no-print">Draft</span></span>
+            <span><strong>Date:</strong> <span id="bill-date"></span></span>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <span><strong>Table:</strong> <span id="bill-table"></span></span> | 
+            <span><strong>Type:</strong> <span id="bill-type"></span></span>
+        </div>
+
+        <table style="width:100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+                <tr style="border-bottom: 1px dashed #000; border-top: 1px dashed #000;">
+                    <th style="padding: 8px 0; text-align: left;">Item</th>
+                    <th style="padding: 8px 0; text-align: right;">Qty</th>
+                    <th style="padding: 8px 0; text-align: right;">Amt</th>
+                </tr>
+            </thead>
+            <tbody id="bill-items-body"></tbody>
         </table>
-        <hr>
-        <h3 style="text-align:right;">Total: ₹<span id="bill-total"></span></h3>
-        <p style="text-align:center; font-size:12px; margin-top:20px;">Thank You! Visit Again!</p>
+
+        <div style="text-align: right; font-size: 1.2rem; font-weight: 800; border-top: 1px solid #000; padding-top: 10px;">
+            Total Amount: ₹<span id="bill-total"></span>
+        </div>
+
+        <!-- QR Placeholder -->
+        <div id="print-qr-section" style="margin-top: 25px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            <p style="font-size: 12px; margin: 0; font-weight: 600;">Scan to Pay via UPI</p>
+            <div id="bill-qr-code" style="padding: 5px; background: white; border: 1px solid #eee;"></div>
+            <p style="font-size: 10px; color: #555;">UPI ID: nithyamudliar@okksbi</p>
+        </div>
+
+        <p style="text-align:center; font-size:12px; margin-top:30px; border-top: 1px dashed #ccc; padding-top: 10px;">
+            Thank You! Visit Again!<br>
+            Powered by Come Bro Chill Bro
+        </p>
     </div>
 
     <script src="/frontend/js/config.js"></script>
